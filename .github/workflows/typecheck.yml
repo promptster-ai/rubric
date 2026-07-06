@@ -1,4 +1,5 @@
-# Type-checks the rubric contract + validates rubric.json loads without throwing.
+# Type-checks the rubric contract + validates rubric.json loads without throwing,
+# and verifies the README's generated rubric section is in sync with rubric.json.
 # The import-time validator in src/index.ts is the real guard; tsc runs it.
 name: typecheck
 
@@ -17,3 +18,5 @@ jobs:
           node-version: 22
       - name: Type-check
         run: npx -y -p typescript@5 tsc --noEmit -p tsconfig.json
+      - name: README in sync with rubric.json
+        run: node scripts/render-readme.mjs --check
