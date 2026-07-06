@@ -41,6 +41,8 @@
     "ai-fluency"
   ],
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "render": "node scripts/render-readme.mjs",
+    "render:check": "node scripts/render-readme.mjs --check"
   }
 }
