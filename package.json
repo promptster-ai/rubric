@@ -1,0 +1,46 @@
+{
+  "name": "@promptster-ai/rubric",
+  "version": "0.2.1",
+  "description": "Promptster AI-fluency rubric — the public data artifact (8 dimensions + behavioral anchors, 5 tiers, 4 phases, methodology sources). Anchors and citations only; criteria and scoring weights are not part of this package.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./src/types.ts",
+      "default": "./src/types.ts"
+    },
+    "./rubric.json": "./src/rubric.json",
+    "./schema.json": "./src/rubric.schema.json"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/promptster-ai/rubric.git"
+  },
+  "homepage": "https://github.com/promptster-ai/rubric#readme",
+  "bugs": {
+    "url": "https://github.com/promptster-ai/rubric/issues"
+  },
+  "keywords": [
+    "ai",
+    "rubric",
+    "evaluation",
+    "coding-agents",
+    "developer-productivity",
+    "ai-fluency"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

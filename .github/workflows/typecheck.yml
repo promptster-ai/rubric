@@ -1,0 +1,19 @@
+# Type-checks the rubric contract + validates rubric.json loads without throwing.
+# The import-time validator in src/index.ts is the real guard; tsc runs it.
+name: typecheck
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Type-check
+        run: npx -y -p typescript@5 tsc --noEmit -p tsconfig.json

@@ -1,0 +1,397 @@
+{
+  "schemaVersion": 2,
+  "phases": [
+    {
+      "key": "discovery",
+      "label": "Discovery",
+      "blurb": "Orienting and framing the work before touching code."
+    },
+    {
+      "key": "implementation",
+      "label": "Implementation",
+      "blurb": "Directing the agent and steering its output."
+    },
+    {
+      "key": "verification",
+      "label": "Verification",
+      "blurb": "Proving the work is done — evidence over assertion."
+    },
+    {
+      "key": "cross_cutting",
+      "label": "Cross-cutting",
+      "blurb": "Habits that run the whole session."
+    }
+  ],
+  "tiers": [
+    {
+      "key": "strong",
+      "label": "Strong",
+      "shortLabel": "Strong",
+      "intent": "good",
+      "hex": "#28c840",
+      "text": "#28c840",
+      "badge": {
+        "color": "#28c840",
+        "background": "rgba(40, 200, 64, 0.10)",
+        "border": "1px solid rgba(40, 200, 64, 0.28)"
+      },
+      "rank": 4,
+      "help": "Senior-level demonstration on this dimension.",
+      "structural": false
+    },
+    {
+      "key": "adequate",
+      "label": "Adequate",
+      "shortLabel": "Adequate",
+      "intent": "good",
+      "hex": "#febc2e",
+      "text": "#febc2e",
+      "badge": {
+        "color": "#febc2e",
+        "background": "rgba(254, 188, 46, 0.10)",
+        "border": "1px solid rgba(254, 188, 46, 0.30)"
+      },
+      "rank": 3,
+      "help": "Meets the baseline for this dimension.",
+      "structural": false
+    },
+    {
+      "key": "developing",
+      "label": "Developing",
+      "shortLabel": "Developing",
+      "intent": "gap",
+      "hex": "#ef4444",
+      "text": "#f87171",
+      "badge": {
+        "color": "#f87171",
+        "background": "rgba(239, 68, 68, 0.10)",
+        "border": "1px solid rgba(239, 68, 68, 0.28)"
+      },
+      "rank": 1,
+      "help": "Evidence is present but falls short — the highest-leverage place to improve.",
+      "structural": false
+    },
+    {
+      "key": "insufficient_evidence",
+      "label": "Not enough signal",
+      "shortLabel": "No signal",
+      "intent": "neutral",
+      "hex": "#8a8a96",
+      "text": "#8a8a96",
+      "badge": {
+        "color": "#8a8a96",
+        "background": "rgba(138, 138, 150, 0.08)",
+        "border": "1px solid rgba(138, 138, 150, 0.24)"
+      },
+      "rank": 0,
+      "help": "This phase didn't occur or produced too little signal to grade. Not a weakness.",
+      "structural": false
+    },
+    {
+      "key": "not_collectible",
+      "label": "Not capturable",
+      "shortLabel": "N/A",
+      "intent": "neutral",
+      "hex": "#94a3b8",
+      "text": "rgba(148, 163, 184, 0.92)",
+      "badge": {
+        "color": "rgba(148, 163, 184, 0.92)",
+        "background": "rgba(148, 163, 184, 0.06)",
+        "border": "1px dashed rgba(148, 163, 184, 0.40)"
+      },
+      "rank": 0,
+      "help": "This agent can't emit the telemetry for this dimension (e.g. no token signal on Cursor). Not a reflection of the engineer.",
+      "structural": true
+    }
+  ],
+  "dimensions": [
+    {
+      "key": "task_framing",
+      "label": "Task framing",
+      "phase": "discovery",
+      "surfaces": ["hiring"],
+      "measures": "How the work was decomposed and ordered before any code landed — goal, scope, and non-goals stated up front.",
+      "detail": "Before any code lands, did the engineer turn an ambiguous brief into a plan the agent can execute against? We look for an explicit goal, a scoped set of files, stated non-goals, and a clear ordering — orient → plan → implement → verify. Interrogating the brief itself is a strong marker: spotting an ambiguity or a wrong assumption in the task as given and surfacing it before work starts is senior framing, not friction. Decomposing the work into independent, parallel-safe workstreams is credited here as framing — the human act of actually running them concurrently is ecosystem leverage. This is the single biggest predictor of whether the rest of the session stays on-rails: good framing gives the agent guardrails and gives every later prompt something to anchor to. Weak framing surfaces downstream as thrash, scope creep, and rework.",
+      "anchors": {
+        "developing": "Jumps to edits with no plan; scope and non-goals are implicit.",
+        "adequate": "States the goal and rough scope, but ordering or constraints stay loose.",
+        "strong": "Decomposes into orient → plan → implement → verify, with non-goals fenced before code."
+      },
+      "sources": [
+        {
+          "name": "Anthropic",
+          "detail": "Claude Code best practices, AI Fluency framework, subagent guidance",
+          "url": "https://code.claude.com/docs/en/best-practices"
+        },
+        {
+          "name": "Mitchell Hashimoto",
+          "detail": "Plan-first prompting, never ship unreviewed AI code",
+          "url": "https://mitchellh.com/writing/non-trivial-vibing"
+        }
+      ]
+    },
+    {
+      "key": "comprehension_grounding",
+      "label": "Comprehension grounding",
+      "phase": "discovery",
+      "surfaces": ["hiring"],
+      "measures": "Whether discovery produced a correct understanding — root-cause hypothesis confirmed against the real code, not assumed.",
+      "detail": "Did discovery actually produce a correct mental model, or did the engineer act on a guess? We score whether a root-cause hypothesis was formed and then confirmed against the real code — reading the relevant files, the contract, the call sites — before mutating anything. Grounded comprehension is what separates a fix that holds from one that papers over a symptom. Most expensive AI-assisted mistakes trace back to confidently editing code nobody actually read.",
+      "anchors": {
+        "developing": "Acts on a guess; never confirms the mechanism in the actual codebase.",
+        "adequate": "Reads the relevant code but stops short of confirming the root cause.",
+        "strong": "Forms a hypothesis and grounds it in the real code before mutating anything."
+      },
+      "sources": [
+        {
+          "name": "Boris Cherny",
+          "detail": "Creator of Claude Code — verification-first, plan-then-one-shot, corrections into CLAUDE.md",
+          "url": "https://x.com/bcherny/status/2007179832300581177"
+        },
+        {
+          "name": "Simon Willison",
+          "detail": "“If you haven’t seen it run, it’s not a working system”",
+          "url": "https://simonwillison.net/2025/Mar/11/using-llms-for-code/"
+        }
+      ]
+    },
+    {
+      "key": "direction_quality",
+      "label": "Direction quality",
+      "phase": "implementation",
+      "surfaces": ["hiring", "teams"],
+      "measures": "The behavioral specificity of the prompts — expected-vs-actual, pasted evidence, constraints, acceptance criteria, pattern pointers.",
+      "detail": "The behavioral specificity of the prompts that steer implementation. Strong direction pins expected-vs-actual behavior, pastes the real error or evidence, names constraints and acceptance criteria, and points at the pattern to follow. This is where AI fluency is most visible: a precise prompt collapses three round-trips into one, while a vague “fix it” hands the agent the wheel and hopes. We read every implementation prompt for how much of the target was specified versus left to the model to guess.",
+      "anchors": {
+        "developing": "Vague asks ('fix it'); no target, no constraints, no acceptance bar.",
+        "adequate": "Names the goal and some constraints, but leaves room for drift.",
+        "strong": "Pins expected behavior, constraints, and the acceptance check in one pass."
+      },
+      "sources": [
+        {
+          "name": "Anthropic",
+          "detail": "Claude Code best practices, AI Fluency framework, subagent guidance",
+          "url": "https://code.claude.com/docs/en/best-practices"
+        },
+        {
+          "name": "Thorsten Ball",
+          "detail": "Analyze-then-commit prompting, fresh-thread discipline",
+          "url": "https://ampcode.com/notes/how-i-use-amp"
+        }
+      ]
+    },
+    {
+      "key": "steering_discernment",
+      "label": "Steering discernment",
+      "phase": "implementation",
+      "surfaces": ["hiring", "teams"],
+      "measures": "How the AI's output was evaluated and corrected — test-then-steer, adding new information on each correction, and holding the output to a merge bar before it ships.",
+      "detail": "Once the agent produces output, does the engineer actually evaluate it — and when it's wrong, correct with new information rather than bare-retrying? We look for the engineer reading the diff, catching a wrong turn, and steering with fresh evidence — a failing case, a contract detail, a counter-example — on each correction. Steering doesn't end when the code works: merge-bar stewardship is part of this dimension — demanding cleanup and convention adherence, deleting agent-added bloat, and asking for a closing review pass before the work ships. (Breaking a failed correction chain by resetting context is credited under context management, not here.) On the teams surface, where capture is source-free, steering is read from the prompt stream alone — corrections that carry new information versus bare re-asks, cleanup and review-pass asks as the stewardship evidence — with a coaching framing. Discernment is the skill that keeps the human in the loop as a reviewer, not a rubber stamp. Its absence is the clearest tell of someone who'll ship whatever the model hands them.",
+      "anchors": {
+        "developing": "Bare retries the same ask; accepts output without inspecting it.",
+        "adequate": "Course-corrects, but corrections add little new information.",
+        "strong": "Reads the output, catches the wrong turn, and steers with new evidence each time."
+      },
+      "sources": [
+        {
+          "name": "Andrej Karpathy",
+          "detail": "Verifiable chunks, review-before-accept, de-bloating agent output",
+          "url": "https://x.com/karpathy/status/2015883857489522876"
+        },
+        {
+          "name": "Mitchell Hashimoto",
+          "detail": "Plan-first prompting, never ship unreviewed AI code",
+          "url": "https://mitchellh.com/writing/non-trivial-vibing"
+        }
+      ]
+    },
+    {
+      "key": "verification_loop",
+      "label": "Verification loop",
+      "phase": "verification",
+      "surfaces": ["hiring", "teams"],
+      "measures": "Whether a runnable oracle was established and used — red→green ordering, demanding evidence over assertion.",
+      "detail": "Was there a runnable oracle, and was it used the right way around? We score whether the engineer established a check — a failing test, an acceptance criterion, a reproduction — before the fix, then drove a real red → green cycle, demanding evidence over assertion. “It looks done” and a green bar that was already green both score low. Verification discipline is what makes AI-generated code trustworthy at speed; without it, velocity just ships bugs faster.",
+      "anchors": {
+        "developing": "Ships without running anything, or treats a green bar as proof.",
+        "adequate": "Runs tests, but the oracle is thin or set up after the fact.",
+        "strong": "Establishes a runnable check first and drives a real fail→pass cycle."
+      },
+      "sources": [
+        {
+          "name": "Simon Willison",
+          "detail": "“If you haven’t seen it run, it’s not a working system”",
+          "url": "https://simonwillison.net/2025/Mar/11/using-llms-for-code/"
+        },
+        {
+          "name": "DORA 2025",
+          "detail": "AI amplifies only with verification and control systems",
+          "url": "https://dora.dev"
+        }
+      ]
+    },
+    {
+      "key": "fix_integrity",
+      "label": "Fix integrity",
+      "phase": "verification",
+      "surfaces": ["hiring"],
+      "measures": "Whether the fix addresses the root cause with a minimal, honest diff — not symptom suppression, skipped tests, or churn.",
+      "detail": "Does the change address the root cause with an honest, minimal diff — or suppress the symptom to force a green bar? We watch for special-casing, skipped or weakened tests, hardcoded returns, swallowed exceptions, and over-wide diffs full of churn. Deleting agent-added bloat — over-defensive guards, speculative abstraction, off-task edits — is credited under steering discernment's stewardship, not here; but we never read that deletion as symptom suppression or churn, because agents systematically over-defend and experts strip it. With an agent that will happily make any test pass, fix integrity is the difference between resolving a problem and hiding it — and it's the dimension most likely to diverge from a passing CI run.",
+      "anchors": {
+        "developing": "Suppresses the symptom (special-cases, skips, hardcodes) to force green.",
+        "adequate": "Fixes the cause but leaves an over-wide diff full of churn behind.",
+        "strong": "Root-cause fix in a narrow, honest diff — nothing special-cased, no test weakened."
+      },
+      "sources": [
+        {
+          "name": "GitClear",
+          "detail": "211M-line study: AI-era code duplication and churn — grounds fix integrity",
+          "url": "https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality"
+        },
+        {
+          "name": "Steve Yegge & Gene Kim",
+          "detail": "Vibe Coding — review loops, code-health budget",
+          "url": "https://itrevolution.com/articles/the-vibe-coding-loop/"
+        }
+      ]
+    },
+    {
+      "key": "context_management",
+      "label": "Context management",
+      "phase": "cross_cutting",
+      "surfaces": ["hiring", "teams"],
+      "measures": "How the working context was managed — boundary-aligned resets, handoffs, and reset discipline on failed correction chains, not hoarding stale context or panic-clearing.",
+      "detail": "How the engineer managed the agent's working context across the session — compacting or resetting at natural boundaries, versus either hoarding stale context until quality degrades or reflexively /clearing and re-pasting. Deliberate, boundary-aligned resets are a steering tool: they keep the model focused on the current phase. Reset discipline is credited here too — the two-strike rule: corrected twice on the same issue, reset the context and re-prompt better, rather than grinding an eight-turn correction chain into a rotted window. We distinguish an intentional reset (“we've finished the fix, compact before review”) from a panic clear, and from never resetting at all.",
+      "anchors": {
+        "developing": "Never resets and drowns in stale context, or reflexively /clears and re-pastes.",
+        "adequate": "Keeps context workable but without deliberate boundary resets.",
+        "strong": "Compacts at phase boundaries on purpose — reset as a steering tool, not a reflex."
+      },
+      "sources": [
+        {
+          "name": "Peter Steinberger",
+          "detail": "Blast-radius task sizing, context-tax awareness",
+          "url": "https://steipete.me/posts/just-talk-to-it"
+        },
+        {
+          "name": "Thorsten Ball",
+          "detail": "Analyze-then-commit prompting, fresh-thread discipline",
+          "url": "https://ampcode.com/notes/how-i-use-amp"
+        }
+      ]
+    },
+    {
+      "key": "ecosystem_leverage",
+      "label": "Ecosystem leverage",
+      "phase": "cross_cutting",
+      "surfaces": ["hiring", "teams"],
+      "measures": "Whether subagents, MCP tools, skills, and parallel orchestration were used where they visibly paid off — leverage, not tool theater.",
+      "detail": "Did the engineer reach for subagents, MCP tools, and skills where they visibly paid off — or either ignore leverage that would have helped, or invoke tools for show? We score for concrete payoff: a research subagent that kept the main thread clean, an MCP call that grounded a fact instead of guessing, a skill that caught something pre-PR. Parallel execution is credited here too: independent workstreams the engineer launched and steered concurrently, partitioned so they never collide — the decomposition that made them independent is task framing; running them is leverage. The bar is leverage that closed a real loop. Tool theater (invoking something that changed nothing) and missed leverage both score below a focused operator who used exactly the right tool at the right moment.",
+      "anchors": {
+        "developing": "No leverage where it would have helped, or tools used for show.",
+        "adequate": "Uses the ecosystem occasionally, with mixed payoff.",
+        "strong": "Subagents, MCP, and skills each close a concrete loop that mattered."
+      },
+      "sources": [
+        {
+          "name": "Anthropic",
+          "detail": "Claude Code best practices, AI Fluency framework, subagent guidance",
+          "url": "https://code.claude.com/docs/en/best-practices"
+        },
+        {
+          "name": "Armin Ronacher",
+          "detail": "Oracle-before-autonomy, lean tooling over MCP sprawl",
+          "url": "https://lucumr.pocoo.org/2025/6/12/agentic-coding/"
+        }
+      ]
+    }
+  ],
+  "methodologySummary": "Graded against agentic-coding standards published by Anthropic and OpenAI, the documented workflows of practitioners like Boris Cherny (creator of Claude Code), Andrej Karpathy, and Simon Willison, and measurement research from METR, DORA, and GitClear. Each dimension is scored by three independent judge passes aggregated by lower median — a split jury never rounds a candidate up, and any dissent caps confidence.",
+  "methodologyGroups": [
+    {
+      "label": "Frontier-lab guidance",
+      "sources": [
+        {
+          "name": "Anthropic",
+          "detail": "Claude Code best practices, AI Fluency framework, subagent guidance",
+          "url": "https://code.claude.com/docs/en/best-practices"
+        },
+        {
+          "name": "OpenAI",
+          "detail": "Codex best practices, AGENTS.md guide, plan-file workflow",
+          "url": "https://developers.openai.com/codex/learn/best-practices"
+        }
+      ]
+    },
+    {
+      "label": "Practitioner canon",
+      "sources": [
+        {
+          "name": "Boris Cherny",
+          "detail": "Creator of Claude Code — verification-first, plan-then-one-shot, corrections into CLAUDE.md",
+          "url": "https://x.com/bcherny/status/2007179832300581177"
+        },
+        {
+          "name": "Andrej Karpathy",
+          "detail": "Verifiable chunks, review-before-accept, de-bloating agent output",
+          "url": "https://x.com/karpathy/status/2015883857489522876"
+        },
+        {
+          "name": "Simon Willison",
+          "detail": "“If you haven’t seen it run, it’s not a working system”",
+          "url": "https://simonwillison.net/2025/Mar/11/using-llms-for-code/"
+        },
+        {
+          "name": "Mitchell Hashimoto",
+          "detail": "Plan-first prompting, never ship unreviewed AI code",
+          "url": "https://mitchellh.com/writing/non-trivial-vibing"
+        },
+        {
+          "name": "Armin Ronacher",
+          "detail": "Oracle-before-autonomy, lean tooling over MCP sprawl",
+          "url": "https://lucumr.pocoo.org/2025/6/12/agentic-coding/"
+        },
+        {
+          "name": "Peter Steinberger",
+          "detail": "Blast-radius task sizing, context-tax awareness",
+          "url": "https://steipete.me/posts/just-talk-to-it"
+        },
+        {
+          "name": "Steve Yegge & Gene Kim",
+          "detail": "Vibe Coding — review loops, code-health budget",
+          "url": "https://itrevolution.com/articles/the-vibe-coding-loop/"
+        },
+        {
+          "name": "Thorsten Ball",
+          "detail": "Analyze-then-commit prompting, fresh-thread discipline",
+          "url": "https://ampcode.com/notes/how-i-use-amp"
+        }
+      ]
+    },
+    {
+      "label": "Measurement research",
+      "sources": [
+        {
+          "name": "METR (2025 RCT)",
+          "detail": "Experienced devs 19% slower with AI while believing +20% — why self-report fails",
+          "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+        },
+        {
+          "name": "DORA 2025",
+          "detail": "AI amplifies only with verification and control systems",
+          "url": "https://dora.dev"
+        },
+        {
+          "name": "GitClear",
+          "detail": "211M-line study: AI-era code duplication and churn — grounds fix integrity",
+          "url": "https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality"
+        },
+        {
+          "name": "Grounded Copilot (OOPSLA)",
+          "detail": "Exploration vs acceleration modes — the basis of phase segmentation",
+          "url": "https://arxiv.org/abs/2206.15000"
+        }
+      ]
+    }
+  ]
+}
