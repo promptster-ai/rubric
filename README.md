@@ -31,6 +31,7 @@ is grounded in. The product renders this data; it never hard-codes any of it.
 | [`src/types.ts`](src/types.ts) | The TypeScript contract for `rubric.json`. Self-contained — no external imports. |
 | [`src/index.ts`](src/index.ts) | Loads and validates the data at import time — a malformed edit fails loud, not silently. |
 | [`src/rubric.schema.json`](src/rubric.schema.json) | JSON Schema for `rubric.json`. Validate before committing edits. |
+| [`src/templates.json`](src/templates.json) | Role-based templates — presets over a surface's judged dimensions (see [Templates](#templates)). |
 
 ## The model
 
@@ -251,6 +252,32 @@ Graded against agentic-coding standards published by Anthropic and OpenAI, the d
 **Measurement research** — [METR (2025 RCT)](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/) · [DORA 2025](https://dora.dev) · [GitClear](https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality) · [Grounded Copilot (OOPSLA)](https://arxiv.org/abs/2206.15000)
 
 <!-- RUBRIC:END -->
+
+## Templates
+
+[`src/templates.json`](src/templates.json) ships role-based **templates** —
+presets over a surface's judged dimensions that say which dimensions count and
+how much (`engineer`, today's balanced default, and `product_manager`, which
+emphasizes directing and steering). Each template entry carries `enabled`, an
+integer `weight` (0–100), and a `displayOrder`. Weights sum to exactly 100
+across **all** of a template's dimensions, disabled ones included — a disabled
+dimension's weight is its preserved "would-be" emphasis for when it's
+re-enabled. Weights are relative emphasis, not absolute percentages: consumers
+computing scores over the enabled dimensions must renormalize over the enabled
+subset's weights. Import-time validation guarantees every template's dimension
+set exactly matches its surface's judged dimensions (so the two files can't
+drift) and enforces the 100-sum invariant. Applying a template is a consumer
+concern — this package only ships the data.
+
+Template weights are **org-facing display presets** — the relative emphasis a
+team starts from — not the private scoring calibration. The boundary above
+holds: the rubric (and these presets) is open, the calibration is not.
+
+```ts
+import { templatesForSurface } from "@promptster-ai/rubric";
+
+templatesForSurface("teams"); // [engineer, product_manager]
+```
 
 ## Using it
 

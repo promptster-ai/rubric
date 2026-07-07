@@ -1,6 +1,6 @@
 {
   "name": "@promptster-ai/rubric",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Promptster AI-fluency rubric — the public data artifact (8 dimensions + behavioral anchors, 5 tiers, 4 phases, methodology sources). Anchors and citations only; criteria and scoring weights are not part of this package.",
   "license": "MIT",
   "type": "module",
@@ -17,6 +17,7 @@
       "default": "./src/types.ts"
     },
     "./rubric.json": "./src/rubric.json",
+    "./templates.json": "./src/templates.json",
     "./schema.json": "./src/rubric.schema.json"
   },
   "files": [

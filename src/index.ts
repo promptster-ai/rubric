@@ -1,9 +1,12 @@
 import rubricRaw from "./rubric.json";
+import templatesRaw from "./templates.json";
 import type {
   FluencyDimensionKey,
   RubricArtifact,
   RubricDimension,
   RubricSurface,
+  RubricTemplate,
+  RubricTemplateKey,
   RubricTier,
 } from "./types";
 
@@ -37,19 +40,20 @@ function assertCompleteKeySet(
   collection: string,
   actual: readonly string[],
   expected: readonly string[],
+  file = "rubric.json",
 ): void {
   const seen = new Set(actual);
   if (seen.size !== actual.length) {
     const dupes = actual.filter((k, i) => actual.indexOf(k) !== i);
     throw new Error(
-      `rubric.json: duplicate ${collection} key(s): ${[...new Set(dupes)].join(", ")}`,
+      `${file}: duplicate ${collection} key(s): ${[...new Set(dupes)].join(", ")}`,
     );
   }
   const missing = expected.filter((k) => !seen.has(k));
   const extra = actual.filter((k) => !expected.includes(k));
   if (missing.length || extra.length) {
     throw new Error(
-      `rubric.json: ${collection} key set is incomplete` +
+      `${file}: ${collection} key set is incomplete` +
         (missing.length ? ` — missing: ${missing.join(", ")}` : "") +
         (extra.length ? ` — unexpected: ${extra.join(", ")}` : ""),
     );
@@ -132,6 +136,103 @@ export const rubric = validateRubric(rubricRaw as unknown as RubricArtifact);
  *  evidence exist under source-free passive capture. */
 export function dimensionsForSurface(surface: RubricSurface): RubricDimension[] {
   return rubric.dimensions.filter((d) => d.surfaces.includes(surface));
+}
+
+// ---------------------------------------------------------------------------
+// Role-based rubric templates (templates.json).
+//
+// Templates are presets over a surface's judged dimensions — which dimensions
+// count and how much. This package only ships the data; APPLYING a template is
+// a consumer concern (in the teams product it maps to PUT /v1/rubric/overrides).
+// ---------------------------------------------------------------------------
+
+// The template keys templates.json must ship, exactly. Same rationale as
+// EXPECTED_TIER_KEYS: consumers cast lookups by key to a complete Record, so a
+// missing or duplicated key must fail loudly at import time, not at render.
+const EXPECTED_TEMPLATE_KEYS: readonly RubricTemplateKey[] = [
+  "engineer",
+  "product_manager",
+];
+
+function validateTemplates(raw: {
+  schemaVersion: number;
+  templates: RubricTemplate[];
+}): RubricTemplate[] {
+  assertCompleteKeySet(
+    "template",
+    raw.templates.map((t) => t.key),
+    EXPECTED_TEMPLATE_KEYS,
+    "templates.json",
+  );
+  for (const t of raw.templates) {
+    // (e) Surface must be known — reuse KNOWN_SURFACES so a RubricSurface
+    // rename can't leave a template pointing at a surface that no longer
+    // exists (templatesForSurface would silently return []).
+    if (!KNOWN_SURFACES.includes(t.surface)) {
+      throw new Error(
+        `templates.json: template "${t.key}" has unknown surface "${t.surface}" — expected: ${KNOWN_SURFACES.join(", ")}`,
+      );
+    }
+    // (b) Each template must cover its surface's judged dimensions exactly —
+    // reuse dimensionsForSurface() so templates.json can't drift from
+    // rubric.json (a dimension added to or dropped from the surface throws
+    // here until the template is updated to match).
+    assertCompleteKeySet(
+      `template "${t.key}" dimension`,
+      t.dimensions.map((d) => d.key),
+      dimensionsForSurface(t.surface).map((d) => d.key),
+      "templates.json",
+    );
+    const orders = new Set<number>();
+    for (const d of t.dimensions) {
+      // (c) Weights are integer percentages.
+      if (!Number.isInteger(d.weight) || d.weight < 0 || d.weight > 100) {
+        throw new Error(
+          `templates.json: template "${t.key}" dimension "${d.key}" has invalid weight ${d.weight} — must be an integer 0–100`,
+        );
+      }
+      // (d) displayOrder values are unique non-negative integers.
+      if (!Number.isInteger(d.displayOrder) || d.displayOrder < 0) {
+        throw new Error(
+          `templates.json: template "${t.key}" dimension "${d.key}" has invalid displayOrder ${d.displayOrder} — must be an integer >= 0`,
+        );
+      }
+      if (orders.has(d.displayOrder)) {
+        throw new Error(
+          `templates.json: template "${t.key}" has duplicate displayOrder ${d.displayOrder} (dimension "${d.key}")`,
+        );
+      }
+      orders.add(d.displayOrder);
+    }
+    // Weights sum to exactly 100 across ALL dimensions — disabled ones
+    // included, since a disabled dimension's weight is its preserved
+    // "would-be" emphasis (see RubricTemplateDimension.weight). Consumers
+    // scoring over the enabled subset renormalize; this invariant keeps the
+    // stored emphases coherent as a whole.
+    const totalWeight = t.dimensions.reduce((sum, d) => sum + d.weight, 0);
+    if (totalWeight !== 100) {
+      throw new Error(
+        `templates.json: template "${t.key}" weights must sum to 100 across all dimensions (enabled + disabled) — got ${totalWeight}`,
+      );
+    }
+  }
+  return raw.templates;
+}
+
+// templates.json is the single source of truth for the template data. Same TS
+// caveat as rubric.json: JSON imports infer `string`, so we assert the contract
+// once here after validateTemplates() proves it holds.
+export const rubricTemplates: RubricTemplate[] = validateTemplates(
+  templatesRaw as unknown as { schemaVersion: number; templates: RubricTemplate[] },
+);
+
+/** Alias for consumers that import by the vendored-module name (the teams
+ *  app's vendored copy exports RUBRIC_TEMPLATES; Phase C re-exports this). */
+export const RUBRIC_TEMPLATES = rubricTemplates;
+
+/** The templates that preset a product surface's judged dimensions. */
+export function templatesForSurface(surface: RubricSurface): RubricTemplate[] {
+  return rubricTemplates.filter((t) => t.surface === surface);
 }
 
 export * from "./types";
