@@ -3,6 +3,9 @@
   "version": "0.3.0",
   "description": "Promptster AI-fluency rubric — the public data artifact (8 dimensions + behavioral anchors, 5 tiers, 4 phases, methodology sources). Anchors and citations only; criteria and scoring weights are not part of this package.",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./src/index.ts",
