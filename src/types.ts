@@ -120,3 +120,35 @@ export interface RubricArtifact {
   methodologySummary: string;
   methodologyGroups: MethodologyGroup[];
 }
+
+/** The role-based rubric templates shipped in templates.json. */
+export type RubricTemplateKey = "engineer" | "product_manager";
+
+/** One dimension's preset within a template: whether it's judged and how much
+ *  it counts. Templates are presets over a surface's judged dimensions —
+ *  applying one (e.g. via PUT /v1/rubric/overrides in the teams product) is a
+ *  consumer concern, not part of this artifact. */
+export interface RubricTemplateDimension {
+  key: FluencyDimensionKey;
+  enabled: boolean;
+  /** Relative emphasis, 0–100. Weights sum to exactly 100 across ALL of a
+   *  template's dimensions, disabled ones included — a disabled dimension's
+   *  weight is its preserved "would-be" emphasis for when it's re-enabled.
+   *  Weights are relative emphasis, not absolute percentages: a consumer
+   *  computing scores over the enabled dimensions must renormalize over the
+   *  enabled subset's weights. */
+  weight: number;
+  /** 0-based position, unique within a template. */
+  displayOrder: number;
+}
+
+/** A role-based preset over a surface's judged dimensions (the shape of one
+ *  entry in templates.json). */
+export interface RubricTemplate {
+  key: RubricTemplateKey;
+  label: string;
+  description: string;
+  /** The product surface whose judged dimension set the template covers. */
+  surface: RubricSurface;
+  dimensions: RubricTemplateDimension[];
+}

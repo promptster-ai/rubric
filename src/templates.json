@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "templates": [
+    {
+      "key": "engineer",
+      "label": "Engineer",
+      "description": "Today's default — balanced across implementation, verification, and cross-cutting craft.",
+      "surface": "teams",
+      "dimensions": [
+        { "key": "direction_quality", "enabled": true, "weight": 20, "displayOrder": 0 },
+        { "key": "steering_discernment", "enabled": true, "weight": 20, "displayOrder": 1 },
+        { "key": "verification_loop", "enabled": true, "weight": 20, "displayOrder": 2 },
+        { "key": "context_management", "enabled": true, "weight": 20, "displayOrder": 3 },
+        { "key": "ecosystem_leverage", "enabled": true, "weight": 20, "displayOrder": 4 }
+      ]
+    },
+    {
+      "key": "product_manager",
+      "label": "Product manager",
+      "description": "For PMs prototyping with Claude Code — emphasizes directing and steering the agent; de-emphasizes tooling depth.",
+      "surface": "teams",
+      "dimensions": [
+        { "key": "direction_quality", "enabled": true, "weight": 30, "displayOrder": 0 },
+        { "key": "steering_discernment", "enabled": true, "weight": 30, "displayOrder": 1 },
+        { "key": "verification_loop", "enabled": true, "weight": 15, "displayOrder": 2 },
+        { "key": "context_management", "enabled": true, "weight": 15, "displayOrder": 3 },
+        { "key": "ecosystem_leverage", "enabled": false, "weight": 10, "displayOrder": 4 }
+      ]
+    }
+  ]
+}
