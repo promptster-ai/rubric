@@ -1,0 +1,51 @@
+# Publishes @promptster-ai/rubric to GitHub Packages on a `v*` tag.
+#
+# This repo is canonical AND the publisher: the npm scope matches the org that
+# owns this repo, so the default GITHUB_TOKEN can publish — no PAT secret
+# needed (unlike the old monorepo publish flow, which needed
+# PROMPTSTER_PACKAGES_TOKEN because pa-arth/Promptster couldn't write to the
+# promptster-ai scope).
+#
+#   git tag v0.3.0 && git push origin v0.3.0
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@promptster-ai"
+
+      # Same guards CI runs on PRs — a tag shouldn't be able to publish a
+      # broken artifact.
+      - name: Type-check
+        run: npx -y -p typescript@5 tsc --noEmit -p tsconfig.json
+      - name: README in sync with rubric.json
+        run: node scripts/render-readme.mjs --check
+
+      - name: Tag matches package.json version
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          TAG="${GITHUB_REF_NAME#v}"
+          if [ "$PKG" != "$TAG" ]; then
+            echo "tag v$TAG does not match package.json version $PKG" >&2
+            exit 1
+          fi
+
+      - name: Publish
+        run: npm publish --access restricted
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
