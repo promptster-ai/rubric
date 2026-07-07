@@ -149,10 +149,16 @@ export function dimensionsForSurface(surface: RubricSurface): RubricDimension[] 
 // The template keys templates.json must ship, exactly. Same rationale as
 // EXPECTED_TIER_KEYS: consumers cast lookups by key to a complete Record, so a
 // missing or duplicated key must fail loudly at import time, not at render.
-const EXPECTED_TEMPLATE_KEYS: readonly RubricTemplateKey[] = [
-  "engineer",
-  "product_manager",
-];
+// Record<RubricTemplateKey, true> is exhaustive: TypeScript errors here if
+// RubricTemplateKey gains a member without a matching entry — same pattern as
+// SURFACE_EXHAUSTIVENESS.
+const TEMPLATE_EXHAUSTIVENESS: Record<RubricTemplateKey, true> = {
+  engineer: true,
+  product_manager: true,
+};
+const EXPECTED_TEMPLATE_KEYS = Object.keys(
+  TEMPLATE_EXHAUSTIVENESS,
+) as readonly RubricTemplateKey[];
 
 function validateTemplates(raw: {
   schemaVersion: number;
