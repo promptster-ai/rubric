@@ -274,7 +274,7 @@ team starts from — not the private scoring calibration. The boundary above
 holds: the rubric (and these presets) is open, the calibration is not.
 
 ```ts
-import { templatesForSurface } from "@promptster-ai/rubric";
+import { templatesForSurface } from "@promptster/rubric";
 
 templatesForSurface("teams"); // [engineer, product_manager]
 ```
@@ -282,11 +282,15 @@ templatesForSurface("teams"); // [engineer, product_manager]
 ## Using it
 
 It's plain data — the simplest use is to read [`src/rubric.json`](src/rubric.json).
-If you're in a TypeScript project, the typed contract and a couple of helpers ship
-alongside it (vendor the `src/` folder, or install from the workspace):
+If you're in a TypeScript project, install the package and the typed contract and a
+couple of helpers ship alongside it:
+
+```bash
+npm i @promptster/rubric
+```
 
 ```ts
-import { rubric, dimensionsForSurface } from "@promptster-ai/rubric";
+import { rubric, dimensionsForSurface } from "@promptster/rubric";
 
 rubric.dimensions;               // all eight, with anchors + sources
 rubric.tiers;                    // tier semantics (labels, intent, ordering)
@@ -294,8 +298,8 @@ dimensionsForSurface("hiring");  // the 8 judged in a hiring assessment
 dimensionsForSurface("teams");   // the 5 judged under source-free team capture
 ```
 
-The package ships TypeScript source (no build step). A public npm publish is on
-the roadmap; until then, read the JSON directly or vendor the folder.
+The package ships TypeScript source (no build step) — transpile it with your
+bundler (e.g. Next.js `transpilePackages`) or read the JSON directly.
 
 ## Contributing
 

@@ -1,10 +1,9 @@
-# Publishes @promptster-ai/rubric to GitHub Packages on a `v*` tag.
+# Publishes @promptster/rubric to the public npm registry on a `v*` tag.
 #
-# This repo is canonical AND the publisher: the npm scope matches the org that
-# owns this repo, so the default GITHUB_TOKEN can publish — no PAT secret
-# needed (unlike the old monorepo publish flow, which needed
-# PROMPTSTER_PACKAGES_TOKEN because pa-arth/Promptster couldn't write to the
-# promptster-ai scope).
+# The package is public under the @promptster scope on npmjs.org (siblings:
+# @promptster/cli, @promptster/teams-cli, @promptster/cc-audit). Publishing
+# needs an automation token with publish rights to the @promptster scope,
+# stored as the NPM_TOKEN repo secret.
 #
 #   git tag v0.3.0 && git push origin v0.3.0
 name: publish
@@ -19,15 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://npm.pkg.github.com
-          scope: "@promptster-ai"
+          registry-url: https://registry.npmjs.org
 
       # Same guards CI runs on PRs — a tag shouldn't be able to publish a
       # broken artifact.
@@ -46,6 +43,6 @@ jobs:
           fi
 
       - name: Publish
-        run: npm publish --access restricted
+        run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
