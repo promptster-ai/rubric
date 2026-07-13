@@ -50,7 +50,7 @@ The full rubric, rendered live from [`src/rubric.json`](src/rubric.json), follow
 
 ## The rubric
 
-**4 process dimensions (13 sub-facets) across 2 phases**, plus **3 outcome bands reported separately** (not folded into the score). Each dimension is graded 🟥 Developing → 🟨 Adequate → 🟩 Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.
+**4 process dimensions (14 sub-facets) across 2 phases**, plus **3 outcome bands reported separately** (not folded into the score). Each dimension is graded 🟥 Developing → 🟨 Adequate → 🟩 Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.
 
 ### 🧭 Per-task craft
 
@@ -99,8 +99,9 @@ Whether the output was actually exercised before it was trusted — runs, tests,
 | **Exercised the output** | Whether something actually ran the generated code — tests, a build, a dev server, a command (including `!`-prefixed runs) — before it was trusted. | Exercises the change as it goes — the output is seen running before it's trusted. |
 | **Proportionate testing** | Whether verification is sized to the risk — edge, boundary, and failure-path tests on logic that needs them, without burning the full suite on a trivial change. | Verification matches the blast radius — boundary and failure-path tests where it counts, light touch where it doesn't. |
 | **Manual verification** _(positive-only)_ | Text tells that the human checked the running result themselves — 'clicking this does nothing', 'the layout's off'. Adds evidence when present; never penalized when absent (absence floors at insufficient-evidence, not developing). | Concrete manual verification narrated — a specific observed result, 'clicked through, the error's gone'. |
+| **Course correction** _(positive-only)_ | Whether the engineer interrupted the agent mid-flight when it went the wrong way — an ESC/Ctrl+C that cut a running tool call or a text reply being generated — and then redirected it. The redirect's quality is the grade: a redirect that carries NEW information (a pasted failure, a sharper symptom, a fresh constraint) is the strong form; an interrupt followed by a bare re-ask or by abandonment is the weak form. Positive-only: a session with no interrupts is not a weakness — it floors at insufficient-evidence, never developing (the agent may simply never have needed catching). An interrupt-then-context-reset is credited to Context, not here. | Cuts the agent off the moment it heads wrong and redirects with new information each time — a failing case, a sharper symptom, a constraint it was missing. |
 
-**Grounded in:** [Simon Willison](https://simonwillison.net/2025/Mar/11/using-llms-for-code/) · [DORA 2025](https://dora.dev)
+**Grounded in:** [Simon Willison](https://simonwillison.net/2025/Mar/11/using-llms-for-code/) · [DORA 2025](https://dora.dev) · [Andrej Karpathy](https://x.com/karpathy/status/2015883857489522876) · [Mitchell Hashimoto](https://mitchellh.com/writing/non-trivial-vibing)
 
 <details><summary>Why this dimension matters</summary>
 

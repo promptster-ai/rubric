@@ -203,6 +203,18 @@
             "adequate": "A passing mention of a manual check ('looks right').",
             "strong": "Concrete manual verification narrated — a specific observed result, 'clicked through, the error's gone'."
           }
+        },
+        {
+          "key": "course_correction",
+          "label": "Course correction",
+          "reliabilityTier": "medium",
+          "scoring": "positive_only",
+          "signal": "Whether the engineer interrupted the agent mid-flight when it went the wrong way — an ESC/Ctrl+C that cut a running tool call or a text reply being generated — and then redirected it. The redirect's quality is the grade: a redirect that carries NEW information (a pasted failure, a sharper symptom, a fresh constraint) is the strong form; an interrupt followed by a bare re-ask or by abandonment is the weak form. Positive-only: a session with no interrupts is not a weakness — it floors at insufficient-evidence, never developing (the agent may simply never have needed catching). An interrupt-then-context-reset is credited to Context, not here.",
+          "anchors": {
+            "developing": "Interrupts land but nothing sharper follows — the agent is stopped and then handed the same ask again, or the thread is abandoned. (No interrupt at all is no-signal, not this.)",
+            "adequate": "Catches a wrong turn and redirects, but the redirect adds little the agent didn't already have.",
+            "strong": "Cuts the agent off the moment it heads wrong and redirects with new information each time — a failing case, a sharper symptom, a constraint it was missing."
+          }
         }
       ],
       "sources": [
@@ -215,6 +227,16 @@
           "name": "DORA 2025",
           "detail": "AI amplifies only with verification and control systems",
           "url": "https://dora.dev"
+        },
+        {
+          "name": "Andrej Karpathy",
+          "detail": "Verifiable chunks, review-before-accept, de-bloating agent output",
+          "url": "https://x.com/karpathy/status/2015883857489522876"
+        },
+        {
+          "name": "Mitchell Hashimoto",
+          "detail": "Plan-first prompting, never ship unreviewed AI code",
+          "url": "https://mitchellh.com/writing/non-trivial-vibing"
         }
       ]
     },
