@@ -170,7 +170,9 @@
         "signal": { "type": "string", "minLength": 1 },
         "anchors": { "$ref": "#/$defs/anchorSet" },
         "beta": { "type": "boolean" },
-        "scoring": { "type": "string", "enum": ["graded", "positive_only"] }
+        "scoring": { "type": "string", "enum": ["graded", "positive_only"] },
+        "judgeBlock": { "type": "string", "minLength": 1 },
+        "judgeBlockTeams": { "type": "string", "minLength": 1 }
       }
     },
     "dimension": {

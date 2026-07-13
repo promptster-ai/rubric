@@ -112,6 +112,16 @@ export interface RubricSubFacet {
    *  insufficient_evidence, never developing (e.g. manual-verification tells
    *  that may simply go un-narrated). */
   scoring?: "graded" | "positive_only";
+  /** Calibrated grading prose injected into the LLM judge prompt for the
+   *  HIRING form of this sub-facet. Engine-agnostic (no internal signal/field
+   *  names) so the rubric can be the single source of truth for both anchors
+   *  and judge prose. Optional — most sub-facets don't carry it yet. */
+  judgeBlock?: string;
+  /** The teams/source-free variant of `judgeBlock`: the same construct
+   *  reframed for the teams capture boundary (prompts and interrupt shape
+   *  only — never diffs, file contents, or assistant text) and as coaching
+   *  rather than a hiring verdict. Optional. */
+  judgeBlockTeams?: string;
 }
 
 /** One rubric dimension (a row): what it measures, why it matters, the
