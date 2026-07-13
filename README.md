@@ -15,8 +15,7 @@
 This repository is the **canonical source of truth** for the rubric
 [Promptster](https://promptster.ai) grades against — the eight dimensions, their
 behavioral anchors, the tier semantics, and the published research each dimension
-is grounded in. The product renders this data; it never hard-codes any of it.
-**Edits land here first** and flow downstream into the product automatically.
+is grounded in.
 
 > The rubric — **what good looks like** — is open, and we think a standard you're
 > graded against should be inspectable and improvable *in public*. The per-prompt
