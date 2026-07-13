@@ -40,12 +40,15 @@ const cell = (s) => String(s).replace(/\|/g, "\\|");
 const sourceLinks = (sources) =>
   sources.map((s) => `[${s.name}](${s.url})`).join(" · ");
 
+const RELIABILITY_LABEL = { high: "High", medium: "Medium", low: "Low" };
+
 function renderDimension(d) {
   const surfaces = d.surfaces.map((s) => `\`${s}\``).join(" · ");
+  const reliability = RELIABILITY_LABEL[d.reliabilityTier] ?? d.reliabilityTier;
   const lines = [];
   lines.push(`#### ${d.label}`);
   lines.push("");
-  lines.push(`_Judged on: ${surfaces}_`);
+  lines.push(`_Judged on: ${surfaces} · Reliability: ${reliability}_`);
   lines.push("");
   lines.push(d.measures);
   lines.push("");
@@ -54,6 +57,16 @@ function renderDimension(d) {
   lines.push(`| ${TIER_EMOJI.developing} **Developing** | ${cell(d.anchors.developing)} |`);
   lines.push(`| ${TIER_EMOJI.adequate} **Adequate** | ${cell(d.anchors.adequate)} |`);
   lines.push(`| ${TIER_EMOJI.strong} **Strong** | ${cell(d.anchors.strong)} |`);
+  lines.push("");
+  lines.push("| Sub-facet | What it reads | Strong looks like |");
+  lines.push("| --- | --- | --- |");
+  for (const sf of d.subFacets) {
+    const tags = [];
+    if (sf.beta) tags.push("_(beta)_");
+    if (sf.scoring === "positive_only") tags.push("_(positive-only)_");
+    const label = [`**${sf.label}**`, ...tags].join(" ");
+    lines.push(`| ${label} | ${cell(sf.signal)} | ${cell(sf.anchors.strong)} |`);
+  }
   lines.push("");
   lines.push(`**Grounded in:** ${sourceLinks(d.sources)}`);
   lines.push("");
@@ -73,8 +86,12 @@ function render() {
   out.push("");
   out.push("## The rubric");
   out.push("");
+  const subFacetCount = rubric.dimensions.reduce(
+    (n, d) => n + d.subFacets.length,
+    0,
+  );
   out.push(
-    `**${rubric.dimensions.length} dimensions across ${rubric.phases.length} phases.** Each dimension is graded ${TIER_EMOJI.developing} Developing → ${TIER_EMOJI.adequate} Adequate → ${TIER_EMOJI.strong} Strong against the behavioral anchors below, and points at the published sources it's grounded in.`,
+    `**${rubric.dimensions.length} process dimensions (${subFacetCount} sub-facets) across ${rubric.phases.length} phases.** Each dimension is graded ${TIER_EMOJI.developing} Developing → ${TIER_EMOJI.adequate} Adequate → ${TIER_EMOJI.strong} Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.`,
   );
   out.push("");
 

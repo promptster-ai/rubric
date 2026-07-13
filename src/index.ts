@@ -1,22 +1,38 @@
 import rubricRaw from "./rubric.json";
 import templatesRaw from "./templates.json";
 import type {
-  FluencyDimensionKey,
   RubricArtifact,
   RubricDimension,
+  RubricReliabilityTier,
+  RubricSubFacet,
   RubricSurface,
   RubricTemplate,
   RubricTemplateKey,
   RubricTier,
 } from "./types";
 
-// The complete key sets the runtime loaders assume. tier.ts / rubric-anchors.ts
-// / methodology.ts each cast `Object.fromEntries(rubric.tiers|dimensions …)` to
-// a *complete* Record. If rubric.json ever drops (or duplicates) a key, that
-// cast lies: callers read `undefined` and emit NaN ordering, blank level text,
-// or missing citations. rubric.schema.json documents the shape but isn't
-// executed anywhere, so this is the guard that actually runs — at import, in
-// dev, build, and tests.
+// ---------------------------------------------------------------------------
+// Import-time validation.
+//
+// rubric.json is the SINGLE file a contributor edits to change the rubric, and
+// this validator is what keeps a malformed edit from loading silently. It
+// deliberately does NOT hardcode the set of dimensions — dimensions are open by
+// design so the community can extend "what makes a good AI-tools user" without
+// editing types, schema, and guards in lockstep.
+//
+// What stays strict is the fixed scaffolding: the five tier keys (they drive UI
+// color + ordering), the known surfaces, and the enum-valued fields. Everything
+// dimension-shaped is validated STRUCTURALLY — well-formed, internally
+// consistent, no duplicate keys — not against an allow-list.
+//
+// tsc does not run this (rubric.json is cast past its type); `npm run validate`
+// and any runtime import execute it.
+// ---------------------------------------------------------------------------
+
+// The five tiers are a fixed contract, not community-extensible: downstream
+// loaders cast Object.fromEntries(rubric.tiers) to a complete Record<RubricTier,
+// …>, so a missing or duplicated tier key would make callers read `undefined`
+// (NaN ordering, blank labels). This stays an exact allow-list.
 const EXPECTED_TIER_KEYS: readonly RubricTier[] = [
   "strong",
   "adequate",
@@ -25,16 +41,13 @@ const EXPECTED_TIER_KEYS: readonly RubricTier[] = [
   "not_collectible",
 ];
 
-const EXPECTED_DIMENSION_KEYS: readonly FluencyDimensionKey[] = [
-  "task_framing",
-  "comprehension_grounding",
-  "direction_quality",
-  "steering_discernment",
-  "verification_loop",
-  "fix_integrity",
-  "context_management",
-  "ecosystem_leverage",
+const KNOWN_RELIABILITY_TIERS: readonly RubricReliabilityTier[] = [
+  "high",
+  "medium",
+  "low",
 ];
+
+const KNOWN_SCORING_MODES = ["graded", "positive_only"] as const;
 
 function assertCompleteKeySet(
   collection: string,
@@ -88,52 +101,69 @@ function assertValidSurfaces(dimensions: readonly RubricDimension[]): void {
   }
 }
 
-// Judged-dimension counts per surface: hiring judges all 8, teams judges the
-// 5 collectible under source-free passive capture (see dimensionsForSurface).
-// If a rubric.json edit accidentally drops a surface from a dimension, this
-// throws at import time instead of silently returning fewer rows.
-const EXPECTED_SURFACE_DIMENSION_COUNTS: Record<RubricSurface, number> = {
-  hiring: 8,
-  teams: 5,
-};
-
-function assertSurfaceDimensionCounts(
-  dimensions: readonly RubricDimension[],
-): void {
-  for (const [surface, expected] of Object.entries(
-    EXPECTED_SURFACE_DIMENSION_COUNTS,
-  ) as [RubricSurface, number][]) {
-    const actual = dimensions.filter((d) => d.surfaces.includes(surface)).length;
-    if (actual !== expected) {
+// Structural validation for the open-ended dimension set. No hardcoded key
+// list — a contributor adds a dimension to rubric.json and nothing here changes.
+// We check only that each dimension is well-formed and internally consistent:
+// unique dimension keys, a known reliability tier, and a non-empty set of
+// well-formed sub-facets (the unit of coaching; consumers key feedback lookups
+// by (dimension, subFacet), so a dupe or an empty set would collide or drop a
+// coaching row).
+function assertDimensions(dimensions: readonly RubricDimension[]): void {
+  if (!Array.isArray(dimensions) || dimensions.length === 0) {
+    throw new Error("rubric.json: dimensions must be a non-empty array");
+  }
+  const keys = dimensions.map((d) => d.key);
+  // actual === expected: completeness is a no-op, but duplicate detection runs.
+  assertCompleteKeySet("dimension", keys, keys);
+  for (const d of dimensions) {
+    if (!KNOWN_RELIABILITY_TIERS.includes(d.reliabilityTier)) {
       throw new Error(
-        `rubric.json: expected ${expected} dimension(s) for surface "${surface}", got ${actual}`,
+        `rubric.json: dimension "${d.key}" has unknown reliabilityTier "${d.reliabilityTier}" — expected: ${KNOWN_RELIABILITY_TIERS.join(", ")}`,
       );
+    }
+    if (!Array.isArray(d.subFacets) || d.subFacets.length === 0) {
+      throw new Error(
+        `rubric.json: dimension "${d.key}" must declare a non-empty subFacets array`,
+      );
+    }
+    // Array.isArray() widens the narrowed binding to any[]; re-assert the type.
+    const subFacets = d.subFacets as readonly RubricSubFacet[];
+    const sfKeys = subFacets.map((s) => s.key);
+    assertCompleteKeySet(`dimension "${d.key}" sub-facet`, sfKeys, sfKeys);
+    for (const sf of subFacets) {
+      if (!KNOWN_RELIABILITY_TIERS.includes(sf.reliabilityTier)) {
+        throw new Error(
+          `rubric.json: sub-facet "${d.key}.${sf.key}" has unknown reliabilityTier "${sf.reliabilityTier}" — expected: ${KNOWN_RELIABILITY_TIERS.join(", ")}`,
+        );
+      }
+      if (
+        sf.scoring !== undefined &&
+        !KNOWN_SCORING_MODES.includes(sf.scoring)
+      ) {
+        throw new Error(
+          `rubric.json: sub-facet "${d.key}.${sf.key}" has unknown scoring "${sf.scoring}" — expected: ${KNOWN_SCORING_MODES.join(", ")}`,
+        );
+      }
     }
   }
 }
 
 function validateRubric(r: RubricArtifact): RubricArtifact {
   assertCompleteKeySet("tier", r.tiers.map((t) => t.key), EXPECTED_TIER_KEYS);
-  assertCompleteKeySet(
-    "dimension",
-    r.dimensions.map((d) => d.key),
-    EXPECTED_DIMENSION_KEYS,
-  );
   assertValidSurfaces(r.dimensions);
-  assertSurfaceDimensionCounts(r.dimensions);
+  assertDimensions(r.dimensions);
   return r;
 }
 
 // rubric.json is the single source of truth for the rubric data. TS infers
-// `string` (not the literal unions) for JSON properties, so we assert the
-// contract once here; validateRubric() then proves the key sets are complete
-// before any loader casts them to a complete Record.
+// `string` (not literal unions) for JSON properties, so we assert the contract
+// once here; validateRubric() then proves the data is well-formed before any
+// loader consumes it.
 export const rubric = validateRubric(rubricRaw as unknown as RubricArtifact);
 
-/** The dimensions judged on a product surface, in catalog order. All eight
- *  dimensions ship in rubric.json; `surfaces` is judging metadata, not
- *  removal — hiring judges all 8, teams judges the 5 whose constructs and
- *  evidence exist under source-free passive capture. */
+/** The dimensions judged on a product surface, in catalog order. `surfaces` is
+ *  judging metadata, not removal — a dimension omitted from a surface simply
+ *  isn't judged there. */
 export function dimensionsForSurface(surface: RubricSurface): RubricDimension[] {
   return rubric.dimensions.filter((d) => d.surfaces.includes(surface));
 }
@@ -144,14 +174,17 @@ export function dimensionsForSurface(surface: RubricSurface): RubricDimension[] 
 // Templates are presets over a surface's judged dimensions — which dimensions
 // count and how much. This package only ships the data; APPLYING a template is
 // a consumer concern (in the teams product it maps to PUT /v1/rubric/overrides).
+//
+// Templates are tolerant of the open dimension set: a template lists only the
+// dimensions it weights, may reference only KNOWN dimension keys, and need not
+// cover every dimension (an omitted one is treated as disabled). Adding a
+// dimension to rubric.json therefore does NOT force an edit to every template.
 // ---------------------------------------------------------------------------
 
-// The template keys templates.json must ship, exactly. Same rationale as
-// EXPECTED_TIER_KEYS: consumers cast lookups by key to a complete Record, so a
-// missing or duplicated key must fail loudly at import time, not at render.
-// Record<RubricTemplateKey, true> is exhaustive: TypeScript errors here if
-// RubricTemplateKey gains a member without a matching entry — same pattern as
-// SURFACE_EXHAUSTIVENESS.
+// The template keys templates.json ships. Templates are curated presets, not
+// the community's primary contribution surface (that's dimensions), so this
+// stays an exact allow-list. Record<RubricTemplateKey, true> is exhaustive:
+// TypeScript errors here if RubricTemplateKey gains a member without an entry.
 const TEMPLATE_EXHAUSTIVENESS: Record<RubricTemplateKey, true> = {
   engineer: true,
   product_manager: true,
@@ -170,34 +203,41 @@ function validateTemplates(raw: {
     EXPECTED_TEMPLATE_KEYS,
     "templates.json",
   );
+  const knownDimensionKeys = new Set(rubric.dimensions.map((d) => d.key));
   for (const t of raw.templates) {
-    // (e) Surface must be known — reuse KNOWN_SURFACES so a RubricSurface
-    // rename can't leave a template pointing at a surface that no longer
-    // exists (templatesForSurface would silently return []).
+    // Surface must be known — reuse KNOWN_SURFACES so a RubricSurface rename
+    // can't leave a template pointing at a surface that no longer exists.
     if (!KNOWN_SURFACES.includes(t.surface)) {
       throw new Error(
         `templates.json: template "${t.key}" has unknown surface "${t.surface}" — expected: ${KNOWN_SURFACES.join(", ")}`,
       );
     }
-    // (b) Each template must cover its surface's judged dimensions exactly —
-    // reuse dimensionsForSurface() so templates.json can't drift from
-    // rubric.json (a dimension added to or dropped from the surface throws
-    // here until the template is updated to match).
+    // Dimension keys must be unique within the template and reference dimensions
+    // that exist. A template need NOT list every dimension — omitted ones are
+    // treated as disabled — so this rejects unknown/duplicate keys but not gaps.
+    const tKeys = t.dimensions.map((d) => d.key);
     assertCompleteKeySet(
       `template "${t.key}" dimension`,
-      t.dimensions.map((d) => d.key),
-      dimensionsForSurface(t.surface).map((d) => d.key),
+      tKeys,
+      tKeys,
       "templates.json",
     );
+    const unknown = tKeys.filter((k) => !knownDimensionKeys.has(k));
+    if (unknown.length) {
+      throw new Error(
+        `templates.json: template "${t.key}" references unknown dimension(s): ${unknown.join(", ")} — not present in rubric.json`,
+      );
+    }
     const orders = new Set<number>();
     for (const d of t.dimensions) {
-      // (c) Weights are integer percentages.
+      // Weight is relative emphasis, an integer 0–100 (consumers renormalize
+      // over the enabled subset — there is no sum-to-100 requirement).
       if (!Number.isInteger(d.weight) || d.weight < 0 || d.weight > 100) {
         throw new Error(
           `templates.json: template "${t.key}" dimension "${d.key}" has invalid weight ${d.weight} — must be an integer 0–100`,
         );
       }
-      // (d) displayOrder values are unique non-negative integers.
+      // displayOrder values are unique non-negative integers.
       if (!Number.isInteger(d.displayOrder) || d.displayOrder < 0) {
         throw new Error(
           `templates.json: template "${t.key}" dimension "${d.key}" has invalid displayOrder ${d.displayOrder} — must be an integer >= 0`,
@@ -209,17 +249,6 @@ function validateTemplates(raw: {
         );
       }
       orders.add(d.displayOrder);
-    }
-    // Weights sum to exactly 100 across ALL dimensions — disabled ones
-    // included, since a disabled dimension's weight is its preserved
-    // "would-be" emphasis (see RubricTemplateDimension.weight). Consumers
-    // scoring over the enabled subset renormalize; this invariant keeps the
-    // stored emphases coherent as a whole.
-    const totalWeight = t.dimensions.reduce((sum, d) => sum + d.weight, 0);
-    if (totalWeight !== 100) {
-      throw new Error(
-        `templates.json: template "${t.key}" weights must sum to 100 across all dimensions (enabled + disabled) — got ${totalWeight}`,
-      );
     }
   }
   return raw.templates;

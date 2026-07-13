@@ -1,6 +1,8 @@
-# Type-checks the rubric contract + validates rubric.json loads without throwing,
+# Type-checks the rubric contract, validates rubric.json loads without throwing,
 # and verifies the README's generated rubric section is in sync with rubric.json.
-# The import-time validator in src/index.ts is the real guard; tsc runs it.
+# tsc only type-checks (rubric.json is cast past its type); the `validate` step
+# actually executes the import-time structural validator in src/index.ts — that
+# is the guard that catches a malformed data edit.
 name: typecheck
 
 on:
@@ -18,5 +20,7 @@ jobs:
           node-version: 22
       - name: Type-check
         run: npx -y -p typescript@5 tsc --noEmit -p tsconfig.json
+      - name: Validate rubric loads (runtime structural checks)
+        run: npx -y tsx scripts/validate.mjs
       - name: README in sync with rubric.json
         run: node scripts/render-readme.mjs --check
