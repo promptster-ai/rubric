@@ -78,6 +78,28 @@ function renderDimension(d) {
   return lines.join("\n");
 }
 
+function renderBand(b) {
+  const lines = [];
+  lines.push(`#### ${b.label}`);
+  lines.push("");
+  lines.push(b.measures);
+  lines.push("");
+  lines.push("| Level | Anchor |");
+  lines.push("| --- | --- |");
+  lines.push(`| ${TIER_EMOJI.developing} **Developing** | ${cell(b.anchors.developing)} |`);
+  lines.push(`| ${TIER_EMOJI.adequate} **Adequate** | ${cell(b.anchors.adequate)} |`);
+  lines.push(`| ${TIER_EMOJI.strong} **Strong** | ${cell(b.anchors.strong)} |`);
+  lines.push("");
+  lines.push(`**Grounded in:** ${sourceLinks(b.sources)}`);
+  lines.push("");
+  lines.push("<details><summary>Why this band is reported apart</summary>");
+  lines.push("");
+  lines.push(b.detail);
+  lines.push("");
+  lines.push("</details>");
+  return lines.join("\n");
+}
+
 function render() {
   const out = [];
   out.push(
@@ -91,7 +113,7 @@ function render() {
     0,
   );
   out.push(
-    `**${rubric.dimensions.length} process dimensions (${subFacetCount} sub-facets) across ${rubric.phases.length} phases.** Each dimension is graded ${TIER_EMOJI.developing} Developing → ${TIER_EMOJI.adequate} Adequate → ${TIER_EMOJI.strong} Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.`,
+    `**${rubric.dimensions.length} process dimensions (${subFacetCount} sub-facets) across ${rubric.phases.length} phases**, plus **${rubric.bands.length} outcome bands reported separately** (not folded into the score). Each dimension is graded ${TIER_EMOJI.developing} Developing → ${TIER_EMOJI.adequate} Adequate → ${TIER_EMOJI.strong} Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.`,
   );
   out.push("");
 
@@ -104,6 +126,18 @@ function render() {
     out.push(`_${phase.blurb}_`);
     out.push("");
     out.push(dims.map(renderDimension).join("\n\n"));
+    out.push("");
+  }
+
+  // Bands — the outcome half, reported apart from the process score.
+  if (rubric.bands?.length) {
+    out.push("### 📤 Bands — reported, not scored");
+    out.push("");
+    out.push(
+      "Outcome measures — what the work *produced* — reported beside the process score and **never folded into it**. Holding outcomes out of the score keeps the process→outcome correlation honest: a lucky clean diff can't inflate the grade, and a churny result can't deflate it. Graded on the same tiers as the dimensions.",
+    );
+    out.push("");
+    out.push(rubric.bands.map(renderBand).join("\n\n"));
     out.push("");
   }
 

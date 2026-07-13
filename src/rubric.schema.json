@@ -9,6 +9,7 @@
     "phases",
     "tiers",
     "dimensions",
+    "bands",
     "methodologySummary",
     "methodologyGroups"
   ],
@@ -38,6 +39,18 @@
       "$comment": "Open set — the dimension list is community-extensible. Structural checks only; each item must be a well-formed dimension. Key uniqueness is enforced at runtime by index.ts.",
       "minItems": 1,
       "items": { "$ref": "#/$defs/dimension" }
+    },
+    "bands": {
+      "type": "array",
+      "$comment": "Exactly the three outcome-band keys, each present once. Closed set (unlike dimensions): same maxItems + per-key contains pattern the tiers array uses, forbidding both omissions and duplicates.",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/band" },
+      "allOf": [
+        { "contains": { "properties": { "key": { "const": "craft" } } } },
+        { "contains": { "properties": { "key": { "const": "durability" } } } },
+        { "contains": { "properties": { "key": { "const": "cost" } } } }
+      ]
     },
     "methodologySummary": { "type": "string", "minLength": 1 },
     "methodologyGroups": {
@@ -69,6 +82,11 @@
       "type": "string",
       "$comment": "Open by design — any lower_snake_case key. The shipped keys are direction, verification, context, leverage.",
       "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "bandKey": {
+      "type": "string",
+      "$comment": "Closed set — the three fixed outcome bands.",
+      "enum": ["craft", "durability", "cost"]
     },
     "reliabilityTier": {
       "type": "string",
@@ -190,6 +208,36 @@
           "minItems": 1,
           "items": { "$ref": "#/$defs/subFacet" }
         },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/source" }
+        }
+      }
+    },
+    "band": {
+      "type": "object",
+      "additionalProperties": false,
+      "$comment": "An outcome band — mirrors a dimension's descriptive fields minus the process-judging ones, plus the composite:false marker. Graded on the five tiers but reported apart from the composite process score.",
+      "required": [
+        "key",
+        "label",
+        "composite",
+        "measures",
+        "detail",
+        "anchors",
+        "sources"
+      ],
+      "properties": {
+        "key": { "$ref": "#/$defs/bandKey" },
+        "label": { "type": "string", "minLength": 1 },
+        "composite": {
+          "const": false,
+          "$comment": "Always false: bands are non-composite by definition and must never be weighted into the process score."
+        },
+        "measures": { "type": "string", "minLength": 1 },
+        "detail": { "type": "string", "minLength": 1 },
+        "anchors": { "$ref": "#/$defs/anchorSet" },
         "sources": {
           "type": "array",
           "minItems": 1,

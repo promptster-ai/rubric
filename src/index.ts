@@ -2,6 +2,8 @@ import rubricRaw from "./rubric.json";
 import templatesRaw from "./templates.json";
 import type {
   RubricArtifact,
+  RubricBand,
+  RubricBandKey,
   RubricDimension,
   RubricReliabilityTier,
   RubricSubFacet,
@@ -148,10 +150,43 @@ function assertDimensions(dimensions: readonly RubricDimension[]): void {
   }
 }
 
+// The outcome bands are a CLOSED set, guarded like the tiers — bands are named
+// in the shipped prose and consumers report them by key, so a missing or renamed
+// band is a contract break, not an extension. Record<RubricBandKey, true> is
+// exhaustive: TypeScript errors here if RubricBandKey gains a member without an
+// entry, keeping EXPECTED_BAND_KEYS in lockstep with the union.
+const BAND_EXHAUSTIVENESS: Record<RubricBandKey, true> = {
+  craft: true,
+  durability: true,
+  cost: true,
+};
+const EXPECTED_BAND_KEYS = Object.keys(
+  BAND_EXHAUSTIVENESS,
+) as readonly RubricBandKey[];
+
+// Bands are the non-composite outcome half of the model. This asserts the exact
+// closed set (complete + no dupes) and that every band is flagged
+// `composite: false` — the marker a consumer keys on to keep bands OUT of the
+// weighted process score.
+function assertBands(bands: readonly RubricBand[]): void {
+  if (!Array.isArray(bands) || bands.length === 0) {
+    throw new Error("rubric.json: bands must be a non-empty array");
+  }
+  assertCompleteKeySet("band", bands.map((b) => b.key), EXPECTED_BAND_KEYS);
+  for (const b of bands) {
+    if (b.composite !== false) {
+      throw new Error(
+        `rubric.json: band "${b.key}" must set composite:false — bands are the non-composite outcome half of the model and must never be weighted into the process score`,
+      );
+    }
+  }
+}
+
 function validateRubric(r: RubricArtifact): RubricArtifact {
   assertCompleteKeySet("tier", r.tiers.map((t) => t.key), EXPECTED_TIER_KEYS);
   assertValidSurfaces(r.dimensions);
   assertDimensions(r.dimensions);
+  assertBands(r.bands);
   return r;
 }
 
