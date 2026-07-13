@@ -12,5 +12,5 @@ import { rubric, rubricTemplates } from "../src/index.ts";
 
 const subFacets = rubric.dimensions.reduce((n, d) => n + d.subFacets.length, 0);
 console.log(
-  `✓ rubric valid — ${rubric.dimensions.length} dimension(s), ${subFacets} sub-facet(s), ${rubricTemplates.length} template(s)`,
+  `✓ rubric valid — ${rubric.dimensions.length} dimension(s), ${subFacets} sub-facet(s), ${rubric.bands.length} band(s), ${rubricTemplates.length} template(s)`,
 );

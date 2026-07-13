@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "phases": [
     {
       "key": "discovery",
@@ -349,6 +349,80 @@
           "name": "Armin Ronacher",
           "detail": "Oracle-before-autonomy, lean tooling over MCP sprawl",
           "url": "https://lucumr.pocoo.org/2025/6/12/agentic-coding/"
+        }
+      ]
+    }
+  ],
+  "bands": [
+    {
+      "key": "craft",
+      "label": "Craft & reviewability",
+      "composite": false,
+      "measures": "The quality of what actually landed — a clean, minimal, reviewable diff versus bloated, duplicative code no human vetted.",
+      "detail": "Craft is the outcome half of Direction and Verification: given a good process, did the work that landed read as senior-authored? Small, coherent diffs; no dead scaffolding, copy-paste duplication, or unreviewed AI bloat; changes a reviewer can actually reason about. Reported beside the process score, never folded in — a clean diff can come from luck as easily as skill, and grading process on outcome would let a lucky one-shot mask a bad workflow.",
+      "anchors": {
+        "developing": "Bloated, duplicative, or sprawling diffs — churn a reviewer can't reasonably vet.",
+        "adequate": "Mostly clean, but carries dead scaffolding or edits wider than the change needed.",
+        "strong": "Small, coherent, reviewable diffs — no duplication or unreviewed bloat, senior-authored in shape."
+      },
+      "sources": [
+        {
+          "name": "Andrej Karpathy",
+          "detail": "Verifiable chunks, review-before-accept, de-bloating agent output",
+          "url": "https://x.com/karpathy/status/2015883857489522876"
+        },
+        {
+          "name": "Steve Yegge & Gene Kim",
+          "detail": "Vibe Coding — review loops, code-health budget",
+          "url": "https://itrevolution.com/articles/the-vibe-coding-loop/"
+        }
+      ]
+    },
+    {
+      "key": "durability",
+      "label": "Delivery & durability",
+      "composite": false,
+      "measures": "Whether the shipped work lasted — low downstream churn and rework, versus code rewritten or reverted soon after it landed.",
+      "detail": "Durability is the longest-horizon outcome: did the change survive contact with the codebase? Measured from downstream churn — code that lands and stays stable is durable; code rewritten, reverted, or heavily reworked soon after is not. A lagging signal, correlated with but never folded into the process score, so a durable-looking result can't retroactively excuse a reckless workflow, nor a churny one condemn a sound one.",
+      "anchors": {
+        "developing": "High post-merge churn — the work is reverted, rewritten, or heavily reworked soon after it lands.",
+        "adequate": "Lands and mostly holds, but draws non-trivial follow-up rework.",
+        "strong": "Lands and stays stable — low downstream churn, no revert-and-redo."
+      },
+      "sources": [
+        {
+          "name": "GitClear",
+          "detail": "211M-line study: AI-era code duplication and churn — grounds the durability band",
+          "url": "https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality"
+        },
+        {
+          "name": "DORA 2025",
+          "detail": "AI amplifies only with verification and control systems",
+          "url": "https://dora.dev"
+        }
+      ]
+    },
+    {
+      "key": "cost",
+      "label": "Cost",
+      "composite": false,
+      "measures": "The token and dollar cost of the work relative to its weight — efficient for the task versus burning budget far above what it warranted.",
+      "detail": "Cost is the raw economic outcome behind Context. Most token burn is the model's behavior, not the engineer's — which is exactly why it's a reported band and not a process score: penalizing an engineer for tokens they didn't drive would punish task difficulty, not skill. Reported as spend relative to task weight, so a heavy-but-genuinely-hard task doesn't read as waste.",
+      "anchors": {
+        "developing": "Cost far exceeds the task's weight — heavy burn on work that didn't warrant it.",
+        "adequate": "Cost is in a reasonable range but carries avoidable overhead.",
+        "strong": "Cost tracks task weight — efficient on light work, spend concentrated where the task earned it."
+      },
+      "sources": [
+        {
+          "name": "Peter Steinberger",
+          "detail": "Blast-radius task sizing, context-tax awareness",
+          "url": "https://steipete.me/posts/just-talk-to-it"
+        },
+        {
+          "name": "Thorsten Ball",
+          "detail": "Analyze-then-commit prompting, fresh-thread discipline",
+          "url": "https://ampcode.com/notes/how-i-use-amp"
         }
       ]
     }

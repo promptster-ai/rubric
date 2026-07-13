@@ -138,12 +138,46 @@ export interface RubricDimension {
   sources: RubricSource[];
 }
 
+/** An outcome band key. CLOSED, unlike the open `FluencyDimensionKey`: bands are
+ *  the fixed outcome scaffolding (named in prose), not the community-extensible
+ *  surface. `craft` = reviewability of what landed, `durability` = downstream
+ *  churn/rework, `cost` = spend relative to task weight. */
+export type RubricBandKey = "craft" | "durability" | "cost";
+
+/** One outcome band — the "what the work produced" half of the model, reported
+ *  BESIDE the process score and never folded into it. A band mirrors a
+ *  dimension's descriptive fields (label, measures, detail, graded anchors,
+ *  grounding sources) but drops the process-judging ones (phase, surfaces,
+ *  subFacets, reliabilityTier) and carries the `composite: false` marker.
+ *
+ *  Graded on the same five tiers as dimensions, but `composite: false` means a
+ *  consumer must NOT weight a band into the composite fluency score — keeping
+ *  the process→outcome correlation honest (a lucky clean diff can't inflate the
+ *  process grade; a churny result can't deflate it). */
+export interface RubricBand {
+  key: RubricBandKey;
+  label: string;
+  /** Always false: a band is non-composite by definition. Making an outcome
+   *  measure composite is a deliberate model change, so this is the literal
+   *  `false`, not a free boolean. */
+  composite: false;
+  /** One-line "what this measures". */
+  measures: string;
+  /** Deeper explanation — what the band captures and why it's reported apart. */
+  detail: string;
+  /** developing→strong outcome anchors (reuses the dimension anchor shape). */
+  anchors: RubricAnchorSet;
+  sources: RubricSource[];
+}
+
 /** The whole rubric artifact (the shape of rubric.json). */
 export interface RubricArtifact {
   schemaVersion: number;
   phases: RubricPhase[];
   tiers: RubricTierMeta[];
   dimensions: RubricDimension[];
+  /** Outcome measures reported beside the process score, never composited in. */
+  bands: RubricBand[];
   methodologySummary: string;
   methodologyGroups: MethodologyGroup[];
 }

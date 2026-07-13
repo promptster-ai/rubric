@@ -51,7 +51,7 @@ The full rubric, rendered live from [`src/rubric.json`](src/rubric.json), follow
 
 ## The rubric
 
-**4 process dimensions (13 sub-facets) across 2 phases.** Each dimension is graded 🟥 Developing → 🟨 Adequate → 🟩 Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.
+**4 process dimensions (13 sub-facets) across 2 phases**, plus **3 outcome bands reported separately** (not folded into the score). Each dimension is graded 🟥 Developing → 🟨 Adequate → 🟩 Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.
 
 ### 🧭 Per-task craft
 
@@ -163,6 +163,64 @@ Whether the engineer operates the AI-coding ecosystem well — the right tool fo
 <details><summary>Why this dimension matters</summary>
 
 Leverage is how well the engineer operates the ecosystem around the agent, across two clusters. Workflow: wiring up and using the right tool for the job — skills, hooks (format-to-standard), scoped permissions, MCP servers for db and auth — and not reaching for a token-hungry dynamic workflow where a one-liner would do. Its top marker is workflow codification: converting repeated knowledge into the right durable artifact (a recurring model mistake becomes a repo instruction, a missed edge case a regression test, a mechanical operation a script, a dangerous behavior a permission guardrail) and removing obsolete ones — the closed feedback loop that's the clearest sign of an advanced operator. Velocity: running independent work in parallel where it helps — worktrees for isolation, concurrent sessions, work partitioned so streams don't collide. Because quality is scored separately in the bands, rewarding parallel speed here can't reward slop. This dimension is heavily tool-specific: engineers are credited for using what's available and never penalized for tools their environment doesn't offer.
+
+</details>
+
+### 📤 Bands — reported, not scored
+
+Outcome measures — what the work *produced* — reported beside the process score and **never folded into it**. Holding outcomes out of the score keeps the process→outcome correlation honest: a lucky clean diff can't inflate the grade, and a churny result can't deflate it. Graded on the same tiers as the dimensions.
+
+#### Craft & reviewability
+
+The quality of what actually landed — a clean, minimal, reviewable diff versus bloated, duplicative code no human vetted.
+
+| Level | Anchor |
+| --- | --- |
+| 🟥 **Developing** | Bloated, duplicative, or sprawling diffs — churn a reviewer can't reasonably vet. |
+| 🟨 **Adequate** | Mostly clean, but carries dead scaffolding or edits wider than the change needed. |
+| 🟩 **Strong** | Small, coherent, reviewable diffs — no duplication or unreviewed bloat, senior-authored in shape. |
+
+**Grounded in:** [Andrej Karpathy](https://x.com/karpathy/status/2015883857489522876) · [Steve Yegge & Gene Kim](https://itrevolution.com/articles/the-vibe-coding-loop/)
+
+<details><summary>Why this band is reported apart</summary>
+
+Craft is the outcome half of Direction and Verification: given a good process, did the work that landed read as senior-authored? Small, coherent diffs; no dead scaffolding, copy-paste duplication, or unreviewed AI bloat; changes a reviewer can actually reason about. Reported beside the process score, never folded in — a clean diff can come from luck as easily as skill, and grading process on outcome would let a lucky one-shot mask a bad workflow.
+
+</details>
+
+#### Delivery & durability
+
+Whether the shipped work lasted — low downstream churn and rework, versus code rewritten or reverted soon after it landed.
+
+| Level | Anchor |
+| --- | --- |
+| 🟥 **Developing** | High post-merge churn — the work is reverted, rewritten, or heavily reworked soon after it lands. |
+| 🟨 **Adequate** | Lands and mostly holds, but draws non-trivial follow-up rework. |
+| 🟩 **Strong** | Lands and stays stable — low downstream churn, no revert-and-redo. |
+
+**Grounded in:** [GitClear](https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality) · [DORA 2025](https://dora.dev)
+
+<details><summary>Why this band is reported apart</summary>
+
+Durability is the longest-horizon outcome: did the change survive contact with the codebase? Measured from downstream churn — code that lands and stays stable is durable; code rewritten, reverted, or heavily reworked soon after is not. A lagging signal, correlated with but never folded into the process score, so a durable-looking result can't retroactively excuse a reckless workflow, nor a churny one condemn a sound one.
+
+</details>
+
+#### Cost
+
+The token and dollar cost of the work relative to its weight — efficient for the task versus burning budget far above what it warranted.
+
+| Level | Anchor |
+| --- | --- |
+| 🟥 **Developing** | Cost far exceeds the task's weight — heavy burn on work that didn't warrant it. |
+| 🟨 **Adequate** | Cost is in a reasonable range but carries avoidable overhead. |
+| 🟩 **Strong** | Cost tracks task weight — efficient on light work, spend concentrated where the task earned it. |
+
+**Grounded in:** [Peter Steinberger](https://steipete.me/posts/just-talk-to-it) · [Thorsten Ball](https://ampcode.com/notes/how-i-use-amp)
+
+<details><summary>Why this band is reported apart</summary>
+
+Cost is the raw economic outcome behind Context. Most token burn is the model's behavior, not the engineer's — which is exactly why it's a reported band and not a process score: penalizing an engineer for tokens they didn't drive would punish task difficulty, not skill. Reported as spend relative to task weight, so a heavy-but-genuinely-hard task doesn't read as waste.
 
 </details>
 
