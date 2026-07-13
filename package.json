@@ -1,7 +1,7 @@
 {
   "name": "@promptster/rubric",
   "version": "0.3.0",
-  "description": "Promptster AI-fluency rubric — the public data artifact (8 dimensions + behavioral anchors, 5 tiers, 4 phases, methodology sources). Anchors and citations only; criteria and scoring weights are not part of this package.",
+  "description": "Promptster AI-fluency rubric — the public data artifact (4 process dimensions + sub-facets & behavioral anchors, 5 tiers, methodology sources). Anchors and citations only; criteria and scoring weights are not part of this package.",
   "license": "MIT",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
@@ -47,6 +47,7 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "validate": "npx -y tsx scripts/validate.mjs",
     "render": "node scripts/render-readme.mjs",
     "render:check": "node scripts/render-readme.mjs --check"
   }

@@ -35,20 +35,9 @@
     },
     "dimensions": {
       "type": "array",
-      "$comment": "Exactly the eight dimensionKey values, each present once (same maxItems + per-key contains technique as tiers).",
-      "minItems": 8,
-      "maxItems": 8,
-      "items": { "$ref": "#/$defs/dimension" },
-      "allOf": [
-        { "contains": { "properties": { "key": { "const": "task_framing" } } } },
-        { "contains": { "properties": { "key": { "const": "comprehension_grounding" } } } },
-        { "contains": { "properties": { "key": { "const": "direction_quality" } } } },
-        { "contains": { "properties": { "key": { "const": "steering_discernment" } } } },
-        { "contains": { "properties": { "key": { "const": "verification_loop" } } } },
-        { "contains": { "properties": { "key": { "const": "fix_integrity" } } } },
-        { "contains": { "properties": { "key": { "const": "context_management" } } } },
-        { "contains": { "properties": { "key": { "const": "ecosystem_leverage" } } } }
-      ]
+      "$comment": "Open set — the dimension list is community-extensible. Structural checks only; each item must be a well-formed dimension. Key uniqueness is enforced at runtime by index.ts.",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/dimension" }
     },
     "methodologySummary": { "type": "string", "minLength": 1 },
     "methodologyGroups": {
@@ -78,16 +67,12 @@
     },
     "dimensionKey": {
       "type": "string",
-      "enum": [
-        "task_framing",
-        "comprehension_grounding",
-        "direction_quality",
-        "steering_discernment",
-        "verification_loop",
-        "fix_integrity",
-        "context_management",
-        "ecosystem_leverage"
-      ]
+      "$comment": "Open by design — any lower_snake_case key. The shipped keys are direction, verification, context, leverage.",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "reliabilityTier": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
     },
     "source": {
       "type": "object",
@@ -146,6 +131,30 @@
         "structural": { "type": "boolean" }
       }
     },
+    "anchorSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["developing", "adequate", "strong"],
+      "properties": {
+        "developing": { "type": "string", "minLength": 1 },
+        "adequate": { "type": "string", "minLength": 1 },
+        "strong": { "type": "string", "minLength": 1 }
+      }
+    },
+    "subFacet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label", "reliabilityTier", "signal", "anchors"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "reliabilityTier": { "$ref": "#/$defs/reliabilityTier" },
+        "signal": { "type": "string", "minLength": 1 },
+        "anchors": { "$ref": "#/$defs/anchorSet" },
+        "beta": { "type": "boolean" },
+        "scoring": { "type": "string", "enum": ["graded", "positive_only"] }
+      }
+    },
     "dimension": {
       "type": "object",
       "additionalProperties": false,
@@ -154,9 +163,11 @@
         "label",
         "phase",
         "surfaces",
+        "reliabilityTier",
         "measures",
         "detail",
         "anchors",
+        "subFacets",
         "sources"
       ],
       "properties": {
@@ -170,17 +181,14 @@
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/surface" }
         },
+        "reliabilityTier": { "$ref": "#/$defs/reliabilityTier" },
         "measures": { "type": "string", "minLength": 1 },
         "detail": { "type": "string", "minLength": 1 },
-        "anchors": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["developing", "adequate", "strong"],
-          "properties": {
-            "developing": { "type": "string", "minLength": 1 },
-            "adequate": { "type": "string", "minLength": 1 },
-            "strong": { "type": "string", "minLength": 1 }
-          }
+        "anchors": { "$ref": "#/$defs/anchorSet" },
+        "subFacets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/subFacet" }
         },
         "sources": {
           "type": "array",

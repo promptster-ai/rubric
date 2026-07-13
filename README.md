@@ -51,181 +51,118 @@ The full rubric, rendered live from [`src/rubric.json`](src/rubric.json), follow
 
 ## The rubric
 
-**8 dimensions across 4 phases.** Each dimension is graded 🟥 Developing → 🟨 Adequate → 🟩 Strong against the behavioral anchors below, and points at the published sources it's grounded in.
+**4 process dimensions (13 sub-facets) across 2 phases.** Each dimension is graded 🟥 Developing → 🟨 Adequate → 🟩 Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.
 
-### 🧭 Discovery
+### 🧭 Per-task craft
 
-_Orienting and framing the work before touching code._
+_Framing each task and proving it's done — the work-specific arc._
 
-#### Task framing
+#### Direction
 
-_Judged on: `hiring`_
+_Judged on: `hiring` · `teams` · Reliability: Medium_
 
-How the work was decomposed and ordered before any code landed — goal, scope, and non-goals stated up front.
+Whether the engineer set the agent up to succeed — specific asks, the context only they have, and work shaped so each step could be done right.
 
 | Level | Anchor |
 | --- | --- |
-| 🟥 **Developing** | Jumps to edits with no plan; scope and non-goals are implicit. |
-| 🟨 **Adequate** | States the goal and rough scope, but ordering or constraints stay loose. |
-| 🟩 **Strong** | Decomposes into orient → plan → implement → verify, with non-goals fenced before code. |
+| 🟥 **Developing** | Vague asks with the context left in the engineer's head; work sprawls or fragments. |
+| 🟨 **Adequate** | Clear goal and rough shape, but key intent, constraints, or ordering stay implicit. |
+| 🟩 **Strong** | Specific asks carrying the context only they have, shaped so each step can be done right. |
+
+| Sub-facet | What it reads | Strong looks like |
+| --- | --- | --- |
+| **Specificity** | What each prompt pins down — expected-vs-actual behavior, constraints, acceptance criteria, pasted evidence — versus what's left to the model to guess. | Pins expected behavior, constraints, and the acceptance check in a single ask. |
+| **Latent context** | Whether the engineer supplied context the agent can't discover from the repo — intent, scale assumptions, non-goals, what's throwaway versus load-bearing. Inferred from what was stated up front versus assumptions the agent had to make. | States the intent, scale, and non-goals up front so the agent optimizes for the real target. |
+| **Structuring** | Whether the work was shaped so each step had the context to be right — plan-then-execute versus one mega-prompt versus blind over-chopping. Plan-mode usage that produced coherent scoped steps is read here. | Plans the whole, then executes in scoped steps — each with the context it needs. |
 
 **Grounded in:** [Anthropic](https://code.claude.com/docs/en/best-practices) · [Mitchell Hashimoto](https://mitchellh.com/writing/non-trivial-vibing)
 
 <details><summary>Why this dimension matters</summary>
 
-Before any code lands, did the engineer turn an ambiguous brief into a plan the agent can execute against? We look for an explicit goal, a scoped set of files, stated non-goals, and a clear ordering — orient → plan → implement → verify. Interrogating the brief itself is a strong marker: spotting an ambiguity or a wrong assumption in the task as given and surfacing it before work starts is senior framing, not friction. Decomposing the work into independent, parallel-safe workstreams is credited here as framing — the human act of actually running them concurrently is ecosystem leverage. This is the single biggest predictor of whether the rest of the session stays on-rails: good framing gives the agent guardrails and gives every later prompt something to anchor to. Weak framing surfaces downstream as thrash, scope creep, and rework.
+Direction is everything the engineer controls before and while the agent works: how precisely each ask is stated, how much of the context only they possess gets handed over, and how the work is shaped so every step has what it needs. The highest-value part is latent context — the intent, scale assumptions, and non-goals the agent cannot discover from the repo ("we'll only ever have one user"). Withholding it doesn't cost turns; it produces confidently-wrong output. Structuring is the counterweight to naive decomposition: over-chop the work and each step is locally fine but globally wrong because no unit saw the whole — plan-then-execute (plan mode where it earns it) is how you decompose without starving context. Judged from prompt content and work shape, not from raw turn count, which conflates prompt quality with task difficulty.
 
 </details>
 
-#### Comprehension grounding
+#### Verification
 
-_Judged on: `hiring`_
+_Judged on: `hiring` · `teams` · Reliability: High_
 
-Whether discovery produced a correct understanding — root-cause hypothesis confirmed against the real code, not assumed.
-
-| Level | Anchor |
-| --- | --- |
-| 🟥 **Developing** | Acts on a guess; never confirms the mechanism in the actual codebase. |
-| 🟨 **Adequate** | Reads the relevant code but stops short of confirming the root cause. |
-| 🟩 **Strong** | Forms a hypothesis and grounds it in the real code before mutating anything. |
-
-**Grounded in:** [Boris Cherny](https://x.com/bcherny/status/2007179832300581177) · [Simon Willison](https://simonwillison.net/2025/Mar/11/using-llms-for-code/)
-
-<details><summary>Why this dimension matters</summary>
-
-Did discovery actually produce a correct mental model, or did the engineer act on a guess? We score whether a root-cause hypothesis was formed and then confirmed against the real code — reading the relevant files, the contract, the call sites — before mutating anything. Grounded comprehension is what separates a fix that holds from one that papers over a symptom. Most expensive AI-assisted mistakes trace back to confidently editing code nobody actually read.
-
-</details>
-
-### ⚙️ Implementation
-
-_Directing the agent and steering its output._
-
-#### Direction quality
-
-_Judged on: `hiring` · `teams`_
-
-The behavioral specificity of the prompts — expected-vs-actual, pasted evidence, constraints, acceptance criteria, pattern pointers.
+Whether the output was actually exercised before it was trusted — runs, tests, and hands-on checks, sized to the risk of the change.
 
 | Level | Anchor |
 | --- | --- |
-| 🟥 **Developing** | Vague asks ('fix it'); no target, no constraints, no acceptance bar. |
-| 🟨 **Adequate** | Names the goal and some constraints, but leaves room for drift. |
-| 🟩 **Strong** | Pins expected behavior, constraints, and the acceptance check in one pass. |
+| 🟥 **Developing** | Trusts output without exercising it; a green-looking result is treated as proof. |
+| 🟨 **Adequate** | Runs the code, but after the fact or without matching the effort to the risk. |
+| 🟩 **Strong** | Exercises the change as it goes, with verification sized to the blast radius. |
 
-**Grounded in:** [Anthropic](https://code.claude.com/docs/en/best-practices) · [Thorsten Ball](https://ampcode.com/notes/how-i-use-amp)
-
-<details><summary>Why this dimension matters</summary>
-
-The behavioral specificity of the prompts that steer implementation. Strong direction pins expected-vs-actual behavior, pastes the real error or evidence, names constraints and acceptance criteria, and points at the pattern to follow. This is where AI fluency is most visible: a precise prompt collapses three round-trips into one, while a vague “fix it” hands the agent the wheel and hopes. We read every implementation prompt for how much of the target was specified versus left to the model to guess.
-
-</details>
-
-#### Steering discernment
-
-_Judged on: `hiring` · `teams`_
-
-How the AI's output was evaluated and corrected — test-then-steer, adding new information on each correction, and holding the output to a merge bar before it ships.
-
-| Level | Anchor |
-| --- | --- |
-| 🟥 **Developing** | Bare retries the same ask; accepts output without inspecting it. |
-| 🟨 **Adequate** | Course-corrects, but corrections add little new information. |
-| 🟩 **Strong** | Reads the output, catches the wrong turn, and steers with new evidence each time. |
-
-**Grounded in:** [Andrej Karpathy](https://x.com/karpathy/status/2015883857489522876) · [Mitchell Hashimoto](https://mitchellh.com/writing/non-trivial-vibing)
-
-<details><summary>Why this dimension matters</summary>
-
-Once the agent produces output, does the engineer actually evaluate it — and when it's wrong, correct with new information rather than bare-retrying? We look for the engineer reading the diff, catching a wrong turn, and steering with fresh evidence — a failing case, a contract detail, a counter-example — on each correction. Steering doesn't end when the code works: merge-bar stewardship is part of this dimension — demanding cleanup and convention adherence, deleting agent-added bloat, and asking for a closing review pass before the work ships. (Breaking a failed correction chain by resetting context is credited under context management, not here.) On the teams surface, where capture is source-free, steering is read from the prompt stream alone — corrections that carry new information versus bare re-asks, cleanup and review-pass asks as the stewardship evidence — with a coaching framing. Discernment is the skill that keeps the human in the loop as a reviewer, not a rubber stamp. Its absence is the clearest tell of someone who'll ship whatever the model hands them.
-
-</details>
-
-### ✅ Verification
-
-_Proving the work is done — evidence over assertion._
-
-#### Verification loop
-
-_Judged on: `hiring` · `teams`_
-
-Whether a runnable oracle was established and used — red→green ordering, demanding evidence over assertion.
-
-| Level | Anchor |
-| --- | --- |
-| 🟥 **Developing** | Ships without running anything, or treats a green bar as proof. |
-| 🟨 **Adequate** | Runs tests, but the oracle is thin or set up after the fact. |
-| 🟩 **Strong** | Establishes a runnable check first and drives a real fail→pass cycle. |
+| Sub-facet | What it reads | Strong looks like |
+| --- | --- | --- |
+| **Exercised the output** | Whether something actually ran the generated code — tests, a build, a dev server, a command (including `!`-prefixed runs) — before it was trusted. | Exercises the change as it goes — the output is seen running before it's trusted. |
+| **Proportionate testing** | Whether verification is sized to the risk — edge, boundary, and failure-path tests on logic that needs them, without burning the full suite on a trivial change. | Verification matches the blast radius — boundary and failure-path tests where it counts, light touch where it doesn't. |
+| **Manual verification** _(positive-only)_ | Text tells that the human checked the running result themselves — 'clicking this does nothing', 'the layout's off'. Adds evidence when present; never penalized when absent (absence floors at insufficient-evidence, not developing). | Concrete manual verification narrated — a specific observed result, 'clicked through, the error's gone'. |
 
 **Grounded in:** [Simon Willison](https://simonwillison.net/2025/Mar/11/using-llms-for-code/) · [DORA 2025](https://dora.dev)
 
 <details><summary>Why this dimension matters</summary>
 
-Was there a runnable oracle, and was it used the right way around? We score whether the engineer established a check — a failing test, an acceptance criterion, a reproduction — before the fix, then drove a real red → green cycle, demanding evidence over assertion. “It looks done” and a green bar that was already green both score low. Verification discipline is what makes AI-generated code trustworthy at speed; without it, velocity just ships bugs faster.
+The flagship dimension, and the most reliably observable: the strong signal is that something actually ran the generated code before the engineer trusted it. Because the agent runs commands through its own tools, every test, build, dev-server, and `!`-prefixed run is in the transcript — the main path is fully captured. The blind spot is out-of-band verification (running tests in a separate terminal, checking in an editor): where there's genuinely no observed signal, this scores insufficient-evidence, never failing — absence of observed verification is not proof it didn't happen. Verification is sized to risk: edge and failure-path tests on logic that needs them, not the full CI suite on a rename. Over-verifying trivial changes is a Context (cost) failure; under-verifying risky ones is the failure here.
 
 </details>
 
-#### Fix integrity
+### 🔁 Session-wide habits
 
-_Judged on: `hiring`_
+_Discipline that runs across the whole session, not one task._
 
-Whether the fix addresses the root cause with a minimal, honest diff — not symptom suppression, skipped tests, or churn.
+#### Context
 
-| Level | Anchor |
-| --- | --- |
-| 🟥 **Developing** | Suppresses the symptom (special-cases, skips, hardcodes) to force green. |
-| 🟨 **Adequate** | Fixes the cause but leaves an over-wide diff full of churn behind. |
-| 🟩 **Strong** | Root-cause fix in a narrow, honest diff — nothing special-cased, no test weakened. |
+_Judged on: `hiring` · `teams` · Reliability: High_
 
-**Grounded in:** [GitClear](https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality) · [Steve Yegge & Gene Kim](https://itrevolution.com/articles/the-vibe-coding-loop/)
-
-<details><summary>Why this dimension matters</summary>
-
-Does the change address the root cause with an honest, minimal diff — or suppress the symptom to force a green bar? We watch for special-casing, skipped or weakened tests, hardcoded returns, swallowed exceptions, and over-wide diffs full of churn. Deleting agent-added bloat — over-defensive guards, speculative abstraction, off-task edits — is credited under steering discernment's stewardship, not here; but we never read that deletion as symptom suppression or churn, because agents systematically over-defend and experts strip it. With an agent that will happily make any test pass, fix integrity is the difference between resolving a problem and hiding it — and it's the dimension most likely to diverge from a passing CI run.
-
-</details>
-
-### 🔁 Cross-cutting
-
-_Habits that run the whole session._
-
-#### Context management
-
-_Judged on: `hiring` · `teams`_
-
-How the working context was managed — boundary-aligned resets, handoffs, and reset discipline on failed correction chains, not hoarding stale context or panic-clearing.
+Whether the engineer kept the working context lean and configured — resetting at boundaries, not bloating what's loaded every turn, and keeping token-saving setup turned on.
 
 | Level | Anchor |
 | --- | --- |
-| 🟥 **Developing** | Never resets and drowns in stale context, or reflexively /clears and re-pastes. |
-| 🟨 **Adequate** | Keeps context workable but without deliberate boundary resets. |
-| 🟩 **Strong** | Compacts at phase boundaries on purpose — reset as a steering tool, not a reflex. |
+| 🟥 **Developing** | Bloated, unmanaged context and efficiency features left off — every turn pays the tax. |
+| 🟨 **Adequate** | Workable context and partial setup, but with dead weight and incidental resets. |
+| 🟩 **Strong** | Lean context, deliberate resets, and a setup configured to save tokens turn over turn. |
+
+| Sub-facet | What it reads | Strong looks like |
+| --- | --- | --- |
+| **Context hygiene** | Whether context is reset or compacted at task boundaries versus one bloated window carrying ten tasks of stale state. | Compacts at natural boundaries on purpose — reset as a steering tool, not a reflex. |
+| **Asset bloat** | Whether the always-loaded setup is lean — CLAUDE.md, skills, memory, and plugins that don't burn context every turn (measured by cc-audit). | Lean, high-signal setup — every always-loaded token earns its place. |
+| **Config present & on** | Whether the token-saving setup is even turned on — auto-memory enabled, CLAUDE.md present at both user and project level. | The environment is configured to remember — memory on, project + user CLAUDE.md carrying the standing context. |
+| **Model right-sizing** _(beta)_ | Whether model choice tracks task weight — not the heaviest model on trivial edits. Surfaced while we calibrate; does not affect the score yet. | Model tracks task weight — heavy where it earns it, light where it doesn't. |
 
 **Grounded in:** [Peter Steinberger](https://steipete.me/posts/just-talk-to-it) · [Thorsten Ball](https://ampcode.com/notes/how-i-use-amp)
 
 <details><summary>Why this dimension matters</summary>
 
-How the engineer managed the agent's working context across the session — compacting or resetting at natural boundaries, versus either hoarding stale context until quality degrades or reflexively /clearing and re-pasting. Deliberate, boundary-aligned resets are a steering tool: they keep the model focused on the current phase. Reset discipline is credited here too — the two-strike rule: corrected twice on the same issue, reset the context and re-prompt better, rather than grinding an eight-turn correction chain into a rotted window. We distinguish an intentional reset (“we've finished the fix, compact before review”) from a panic clear, and from never resetting at all.
+Context is the controllable process behind cost. Most raw token burn is the model's behavior — it decides which files to re-read, and redundant reads balloon as the window fills — so we don't score the engineer on a number they didn't drive; that's the Cost band, reported separately. What the engineer does control: resetting or compacting at task boundaries instead of running ten tasks in one bloated window; keeping the always-loaded setup lean (an oversized CLAUDE.md, a stack of plugins, or a memory file that taxes every single turn — measured by cc-audit); and whether the token-saving setup is even switched on. Model right-sizing is surfaced here as a beta signal while we calibrate it — it does not yet affect the score.
 
 </details>
 
-#### Ecosystem leverage
+#### Leverage
 
-_Judged on: `hiring` · `teams`_
+_Judged on: `hiring` · `teams` · Reliability: High_
 
-Whether subagents, MCP tools, skills, and parallel orchestration were used where they visibly paid off — leverage, not tool theater.
+Whether the engineer operates the AI-coding ecosystem well — the right tool for the job, durable workflows codified, and parallel execution where it moves faster.
 
 | Level | Anchor |
 | --- | --- |
-| 🟥 **Developing** | No leverage where it would have helped, or tools used for show. |
-| 🟨 **Adequate** | Uses the ecosystem occasionally, with mixed payoff. |
-| 🟩 **Strong** | Subagents, MCP, and skills each close a concrete loop that mattered. |
+| 🟥 **Developing** | Works serially by hand, ignoring the tooling and durable workflows that would help. |
+| 🟨 **Adequate** | Uses parts of the ecosystem with mixed payoff; little gets codified for next time. |
+| 🟩 **Strong** | Right tool for each job, repeated work codified into durable assets, independent streams run in parallel. |
+
+| Sub-facet | What it reads | Strong looks like |
+| --- | --- | --- |
+| **Tooling** | Whether the ecosystem is wired up and used where it pays off — skills, hooks, scoped permissions, MCP servers for db/auth — and the right-sized tool for the job (no million-token workflow for a one-liner). | Right tool at the right moment — hooks, permissions, MCP, and skills each close a real loop; no tool theater. |
+| **Workflow codification** | Whether repeated knowledge is converted into the right durable artifact — skill vs script vs test vs lint rule vs CLAUDE.md vs CI — with obsolete ones removed. The closed failure→guardrail loop. | Recurring work becomes the right durable mechanism — a repeated mistake becomes a rule, a missed edge case a test — and stale ones are removed. |
+| **Velocity** | Whether independent work is run in parallel where it helps — worktrees for isolation, concurrent sessions, work partitioned so streams don't collide. (Cross-session signal needs fleet correlation.) | Independent work runs concurrently in isolated worktrees/sessions, partitioned to land cleanly. |
 
 **Grounded in:** [Anthropic](https://code.claude.com/docs/en/best-practices) · [Armin Ronacher](https://lucumr.pocoo.org/2025/6/12/agentic-coding/)
 
 <details><summary>Why this dimension matters</summary>
 
-Did the engineer reach for subagents, MCP tools, and skills where they visibly paid off — or either ignore leverage that would have helped, or invoke tools for show? We score for concrete payoff: a research subagent that kept the main thread clean, an MCP call that grounded a fact instead of guessing, a skill that caught something pre-PR. Parallel execution is credited here too: independent workstreams the engineer launched and steered concurrently, partitioned so they never collide — the decomposition that made them independent is task framing; running them is leverage. The bar is leverage that closed a real loop. Tool theater (invoking something that changed nothing) and missed leverage both score below a focused operator who used exactly the right tool at the right moment.
+Leverage is how well the engineer operates the ecosystem around the agent, across two clusters. Workflow: wiring up and using the right tool for the job — skills, hooks (format-to-standard), scoped permissions, MCP servers for db and auth — and not reaching for a token-hungry dynamic workflow where a one-liner would do. Its top marker is workflow codification: converting repeated knowledge into the right durable artifact (a recurring model mistake becomes a repo instruction, a missed edge case a regression test, a mechanical operation a script, a dangerous behavior a permission guardrail) and removing obsolete ones — the closed feedback loop that's the clearest sign of an advanced operator. Velocity: running independent work in parallel where it helps — worktrees for isolation, concurrent sessions, work partitioned so streams don't collide. Because quality is scored separately in the bands, rewarding parallel speed here can't reward slop. This dimension is heavily tool-specific: engineers are credited for using what's available and never penalized for tools their environment doesn't offer.
 
 </details>
 
@@ -238,12 +175,12 @@ Five tiers, and two of them are explicitly **not** "did poorly":
 | 🟩 **Strong** | Senior-level demonstration on this dimension. |
 | 🟨 **Adequate** | Meets the baseline for this dimension. |
 | 🟥 **Developing** | Evidence is present but falls short — the highest-leverage place to improve. |
-| ⚪ **Not enough signal** | This phase didn't occur or produced too little signal to grade. Not a weakness. |
+| ⚪ **Not enough signal** | This behavior didn't occur or produced too little signal to grade. Not a weakness. |
 | ⚪ **Not capturable** | This agent can't emit the telemetry for this dimension (e.g. no token signal on Cursor). Not a reflection of the engineer. |
 
 ### Methodology & sources
 
-Graded against agentic-coding standards published by Anthropic and OpenAI, the documented workflows of practitioners like Boris Cherny (creator of Claude Code), Andrej Karpathy, and Simon Willison, and measurement research from METR, DORA, and GitClear. Each dimension is scored by three independent judge passes aggregated by lower median — a split jury never rounds a candidate up, and any dissent caps confidence.
+Graded against agentic-coding standards published by Anthropic and OpenAI, the documented workflows of practitioners like Boris Cherny (creator of Claude Code), Andrej Karpathy, and Simon Willison, and measurement research from METR, DORA, and GitClear. Four process dimensions score how the engineer works with the agent — a predictor of code quality, kept separate from delivery outcomes so the correlation stays real. Each carries a reliability tier: how confidently the behavior can be judged from session telemetry alone. Every dimension is scored by three independent judge passes aggregated by lower median — a split jury never rounds up, and any dissent caps confidence.
 
 **Frontier-lab guidance** — [Anthropic](https://code.claude.com/docs/en/best-practices) · [OpenAI](https://developers.openai.com/codex/learn/best-practices)
 
