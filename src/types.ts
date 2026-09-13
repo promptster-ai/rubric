@@ -35,6 +35,9 @@ export type PhaseType = "discovery" | "implementation" | "verification";
  *  file contents, or assistant text). */
 export type RubricSurface = "hiring" | "teams";
 
+/** Session evidence a dimension needs before it can be graded. */
+export type RubricCapability = "hidden_spec";
+
 /** Phase a dimension belongs to (graded phases + the cross-cutting bucket). */
 export type FluencyDimensionPhase = PhaseType | "cross_cutting";
 
@@ -135,6 +138,8 @@ export interface RubricDimension {
    *  it is omitted from judging entirely, which is different from
    *  `not_collectible` (that's a TOOL limit within a surface). */
   surfaces: RubricSurface[];
+  /** Missing capabilities make the dimension not_collectible. */
+  requiredCapabilities?: RubricCapability[];
   /** How confidently this dimension can be judged from telemetry alone. */
   reliabilityTier: RubricReliabilityTier;
   /** One-line "what this measures" (matrix row subtitle). */

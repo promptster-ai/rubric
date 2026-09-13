@@ -89,6 +89,13 @@ const KNOWN_SURFACES = Object.keys(SURFACE_EXHAUSTIVENESS) as readonly RubricSur
 
 function assertValidSurfaces(dimensions: readonly RubricDimension[]): void {
   for (const d of dimensions) {
+    if (d.requiredCapabilities !== undefined && (
+      !Array.isArray(d.requiredCapabilities) ||
+      d.requiredCapabilities.some((c) => c !== "hidden_spec") ||
+      new Set(d.requiredCapabilities).size !== d.requiredCapabilities.length
+    )) {
+      throw new Error(`rubric.json: dimension "${d.key}" has invalid requiredCapabilities`);
+    }
     if (!Array.isArray(d.surfaces) || d.surfaces.length === 0) {
       throw new Error(
         `rubric.json: dimension "${d.key}" must declare a non-empty surfaces array`,

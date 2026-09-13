@@ -7,13 +7,13 @@
 
 <p align="center">
   <img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-ffcb6b?labelColor=1a1f29">
-  <img alt="dimensions: 8" src="https://img.shields.io/badge/dimensions-8-4c8bf5?labelColor=1a1f29">
+  <img alt="dimensions: 5" src="https://img.shields.io/badge/dimensions-5-4c8bf5?labelColor=1a1f29">
   <img alt="schema: v2" src="https://img.shields.io/badge/schema-v2-27c93f?labelColor=1a1f29">
   <img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-10b981?labelColor=1a1f29">
 </p>
 
 This repository is the **canonical source of truth** for the rubric
-[Promptster](https://promptster.ai) grades against — the eight dimensions, their
+[Promptster](https://promptster.ai) grades against — the five dimensions, their
 behavioral anchors, the tier semantics, and the published research each dimension
 is grounded in.
 
@@ -26,7 +26,7 @@ is grounded in.
 
 | File | What it is |
 | --- | --- |
-| [`src/rubric.json`](src/rubric.json) | The data: phases, tiers, the eight dimensions (each with behavioral anchors + the published sources it's grounded in), and the methodology disclosure. |
+| [`src/rubric.json`](src/rubric.json) | The data: phases, tiers, the five dimensions (each with behavioral anchors + the published sources it's grounded in), and the methodology disclosure. |
 | [`src/types.ts`](src/types.ts) | The TypeScript contract for `rubric.json`. Self-contained — no external imports. |
 | [`src/index.ts`](src/index.ts) | Loads and validates the data at import time — a malformed edit fails loud, not silently. |
 | [`src/rubric.schema.json`](src/rubric.schema.json) | JSON Schema for `rubric.json`. Validate before committing edits. |
@@ -50,11 +50,38 @@ The full rubric, rendered live from [`src/rubric.json`](src/rubric.json), follow
 
 ## The rubric
 
-**4 process dimensions (14 sub-facets) across 2 phases**, plus **3 outcome bands reported separately** (not folded into the score). Each dimension is graded 🟥 Developing → 🟨 Adequate → 🟩 Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.
+**5 process dimensions (18 sub-facets) across 2 phases**, plus **3 outcome bands reported separately** (not folded into the score). Each dimension is graded 🟥 Developing → 🟨 Adequate → 🟩 Strong against the behavioral anchors below — the sub-facet is the unit of coaching — and points at the published sources it's grounded in.
 
 ### 🧭 Per-task craft
 
 _Framing each task and proving it's done — the work-specific arc._
+
+#### Domain
+
+_Judged on: `hiring` · Reliability: High_
+
+Whether the candidate reconstructed what the system needs from the ticket and the people who hold the missing requirements.
+
+| Level | Anchor |
+| --- | --- |
+| 🟥 **Developing** | The spec misses substantial hidden requirements or carries a ticket implication that should have been cut; the diff shows the system was built for the wrong target. |
+| 🟨 **Adequate** | The diff recovers most hidden requirements and correctly cuts known false implications, but one or more material needs are missed. |
+| 🟩 **Strong** | The diff recovers the hidden requirements, including needs nobody volunteered, and correctly cuts false ticket implications; tested code conforms to the resulting spec. |
+
+| Sub-facet | What it reads | Strong looks like |
+| --- | --- | --- |
+| **Requirements recovered** | Hidden requirements present in the candidate spec, with the message or other event that supports each recovery. | The candidate spec recovers all hidden requirements that the available evidence could establish, including less obvious needs. |
+| **Deliberate cuts** | Ticket implications ruled out by a teammate and correctly omitted from the candidate spec, with the ruling cited. | The candidate cuts the false implication from the spec and cites the ruling that justified the cut. |
+| **What was never asked** | Hidden requirements with no assigned holder, and whether the candidate raised the question that could expose them. | The candidate raises the questions needed to recover unowned requirements, and the resulting spec covers them. |
+| **Conformance to spec** | For requirements covered by tests, whether shipped code meets the candidate spec and the hidden requirement. | Tested code conforms to the candidate spec and the corresponding hidden requirements. |
+
+**Grounded in:** [Anthropic](https://code.claude.com/docs/en/best-practices) · [Mitchell Hashimoto](https://mitchellh.com/writing/non-trivial-vibing)
+
+<details><summary>Why this dimension matters</summary>
+
+Domain compares the candidate-authored spec with the hidden requirement rows, one requirement at a time. Each row is recovered, missed, or correctly cut when a teammate rules out a ticket implication. The comparison is grounded in the fixed answer key and cited session events, not an impression of the conversation. Code conformance is reported beside a row where tests can establish it. Without a hidden spec or a candidate-authored spec, there is no diff to grade and Domain is not collectible.
+
+</details>
 
 #### Direction
 
@@ -289,8 +316,8 @@ import { rubric, dimensionsForSurface } from "@promptster/rubric";
 
 rubric.dimensions;               // all eight, with anchors + sources
 rubric.tiers;                    // tier semantics (labels, intent, ordering)
-dimensionsForSurface("hiring");  // the 8 judged in a hiring assessment
-dimensionsForSurface("teams");   // the 5 judged under source-free team capture
+dimensionsForSurface("hiring");  // the 5 available in a hiring assessment; Domain requires a hidden spec
+dimensionsForSurface("teams");   // the 4 judged under source-free team capture
 ```
 
 The package ships TypeScript source (no build step) — transpile it with your
