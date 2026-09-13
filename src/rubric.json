@@ -96,6 +96,83 @@
   ],
   "dimensions": [
     {
+      "key": "domain",
+      "label": "Domain",
+      "phase": "discovery",
+      "surfaces": [
+        "hiring"
+      ],
+      "requiredCapabilities": [
+        "hidden_spec"
+      ],
+      "reliabilityTier": "high",
+      "measures": "Whether the candidate reconstructed what the system needs from the ticket and the people who hold the missing requirements.",
+      "detail": "Domain compares the candidate-authored spec with the hidden requirement rows, one requirement at a time. Each row is recovered, missed, or correctly cut when a teammate rules out a ticket implication. The comparison is grounded in the fixed answer key and cited session events, not an impression of the conversation. Code conformance is reported beside a row where tests can establish it. Without a hidden spec or a candidate-authored spec, there is no diff to grade and Domain is not collectible.",
+      "anchors": {
+        "developing": "The spec misses substantial hidden requirements or carries a ticket implication that should have been cut; the diff shows the system was built for the wrong target.",
+        "adequate": "The diff recovers most hidden requirements and correctly cuts known false implications, but one or more material needs are missed.",
+        "strong": "The diff recovers the hidden requirements, including needs nobody volunteered, and correctly cuts false ticket implications; tested code conforms to the resulting spec."
+      },
+      "subFacets": [
+        {
+          "key": "recovered",
+          "label": "Requirements recovered",
+          "reliabilityTier": "high",
+          "signal": "Hidden requirements present in the candidate spec, with the message or other event that supports each recovery.",
+          "anchors": {
+            "developing": "The diff marks many hidden requirements missed; the candidate spec mostly repeats the ticket.",
+            "adequate": "Most hidden requirements are recovered in the candidate spec with traceable evidence, but some are missed.",
+            "strong": "The candidate spec recovers all hidden requirements that the available evidence could establish, including less obvious needs."
+          }
+        },
+        {
+          "key": "cut",
+          "label": "Deliberate cuts",
+          "reliabilityTier": "high",
+          "signal": "Ticket implications ruled out by a teammate and correctly omitted from the candidate spec, with the ruling cited.",
+          "anchors": {
+            "developing": "A contradicted ticket implication remains in the spec or disappears without a supported reason.",
+            "adequate": "The candidate identifies the false implication but leaves it softened or ambiguous in the spec.",
+            "strong": "The candidate cuts the false implication from the spec and cites the ruling that justified the cut."
+          }
+        },
+        {
+          "key": "unasked",
+          "label": "What was never asked",
+          "reliabilityTier": "medium",
+          "signal": "Hidden requirements with no assigned holder, and whether the candidate raised the question that could expose them.",
+          "anchors": {
+            "developing": "A requirement nobody held is missed because its ownership, rollout, or failure behavior was never raised.",
+            "adequate": "The candidate probes some unowned needs but the diff still shows a material one missed.",
+            "strong": "The candidate raises the questions needed to recover unowned requirements, and the resulting spec covers them."
+          }
+        },
+        {
+          "key": "conformance",
+          "label": "Conformance to spec",
+          "reliabilityTier": "medium",
+          "signal": "For requirements covered by tests, whether shipped code meets the candidate spec and the hidden requirement.",
+          "anchors": {
+            "developing": "Tested code fails a requirement that the candidate wrote into the spec.",
+            "adequate": "Tested code conforms to the candidate spec, but that spec still misses a hidden need.",
+            "strong": "Tested code conforms to the candidate spec and the corresponding hidden requirements."
+          }
+        }
+      ],
+      "sources": [
+        {
+          "name": "Anthropic",
+          "detail": "Clarify requirements and verify implementation against explicit criteria",
+          "url": "https://code.claude.com/docs/en/best-practices"
+        },
+        {
+          "name": "Mitchell Hashimoto",
+          "detail": "Plan from requirements before coding and review the resulting work",
+          "url": "https://mitchellh.com/writing/non-trivial-vibing"
+        }
+      ]
+    },
+    {
       "key": "direction",
       "label": "Direction",
       "phase": "discovery",

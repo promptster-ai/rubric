@@ -201,6 +201,11 @@
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/surface" }
         },
+        "requiredCapabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["hidden_spec"] }
+        },
         "reliabilityTier": { "$ref": "#/$defs/reliabilityTier" },
         "measures": { "type": "string", "minLength": 1 },
         "detail": { "type": "string", "minLength": 1 },
